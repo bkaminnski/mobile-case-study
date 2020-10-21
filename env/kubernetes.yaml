@@ -1,0 +1,75 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: cassandra-single-node-pv
+  labels:
+    type: local
+spec:
+  storageClassName: cassandra-single-node
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 500Mi
+  hostPath:
+    path: "/data/cassandra-single-node/"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: cassandra-single-node-pvc
+spec:
+  storageClassName: cassandra-single-node
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 500Mi
+    limits:
+      storage: 500Mi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cassandra-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cassandra
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: cassandra
+    spec:
+      containers:
+      - name: cassandra
+        image: cassandra:3.11.8
+        ports:
+        - containerPort: 9042
+        volumeMounts:
+        - name: cassandra-volume
+          mountPath: /var/lib/cassandra
+        resources:
+          requests:
+            memory: "1500Mi"
+            cpu: "500m" # 1/2 core
+          limits:
+            memory: "1500Mi"
+            cpu: "500m" # 1/2 core
+      volumes:
+      - name: cassandra-volume
+        persistentVolumeClaim:
+          claimName: cassandra-single-node-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cassandra-service
+spec:
+  ports:
+  - name: "9042"
+    port: 9042
+    targetPort: 9042
+  selector:
+    app: cassandra

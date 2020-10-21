@@ -1,0 +1,16 @@
+version: '3'
+
+networks:
+  network:
+
+services:
+
+  cassandra:
+    container_name: cassandra
+    image: cassandra:3.11.8
+    ports:
+    - "9042:9042"
+    expose:
+    - "9042"
+    networks:
+    - network

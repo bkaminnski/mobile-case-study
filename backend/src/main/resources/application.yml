@@ -1,0 +1,5 @@
+spring:
+  data:
+    cassandra:
+      local-datacenter: datacenter1
+      keyspace-name: mobilecs
