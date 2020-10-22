@@ -1,4 +1,4 @@
-package com.hclc.mobile.backend;
+package com.hclc.mobilecs.backend;
 
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,12 +18,26 @@ import static org.springframework.data.cassandra.core.mapping.NamingStrategy.SNA
 
 @Configuration
 public class CassandraConfiguration extends AbstractCassandraConfiguration implements BeanClassLoaderAware {
+    @Value("${spring.data.cassandra.contact-points}")
+    private String contactPoints;
+    @Value("${spring.data.cassandra.port}")
+    private int port;
     @Value("${spring.data.cassandra.keyspace-name}")
     private String keyspaceName;
     @Value("${spring.data.cassandra.local-datacenter}")
     private String localDataCenter;
     @Value("classpath:cassandra/keyspace-populator.cql")
     private Resource keyspacePopulator;
+
+    @Override
+    protected String getContactPoints() {
+        return contactPoints;
+    }
+
+    @Override
+    protected int getPort() {
+        return port;
+    }
 
     @Override
     protected String getKeyspaceName() {

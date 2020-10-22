@@ -1,4 +1,4 @@
-package com.hclc.mobile.backend.datarecords;
+package com.hclc.mobilecs.backend.datarecords;
 
 import org.springframework.stereotype.Component;
 
@@ -18,13 +18,13 @@ class DataRecordsGeneratorService {
     }
 
     String generate() {
-        List<DataRecord> records = new DataRecordsGenerator(2, 2).generate();
+        List<DataRecord> records = new DataRecordsGenerator(1, 1).generate();
         dataRecordRepository.saveAll(records);
         return summarized(records);
     }
 
     private String summarized(List<DataRecord> records) {
-        return "Agreements generated in order: " + join(", ", records.stream()
+        return "Total number of generated records: " + records.size() + "\nAgreements generated in order: " + String.join(", ", records.stream()
                 .map(DataRecord::getKey)
                 .map(DataRecordKey::getAgreementId)
                 .map(UUID::toString)

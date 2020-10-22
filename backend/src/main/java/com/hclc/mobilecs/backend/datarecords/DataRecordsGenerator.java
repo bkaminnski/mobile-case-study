@@ -1,4 +1,4 @@
-package com.hclc.mobile.backend.datarecords;
+package com.hclc.mobilecs.backend.datarecords;
 
 import java.time.ZonedDateTime;
 import java.util.*;
@@ -11,7 +11,7 @@ class DataRecordsGenerator {
     private static final long AGREEMENT_ID_SEED = 31423434;
     private static final long INTERNAL_RECORD_ID_SEED = 44134134;
     private static final long RECORDED_BYTES_SEED = 24524555;
-    private static final int SECONDS_BETWEEN_RECORDS = 600;
+    private static final int SECONDS_BETWEEN_RECORDS = 3600;
     private static final long MAX_BYTES_IN_RECORD = 10 * 1024 * 1024; // 10 MB
     private static final ZonedDateTime BEGIN_TIME = ZonedDateTime.parse("2020-01-01T00:00:00+01:00[Europe/Warsaw]");
     private final Random agreementIdRandom = new Random(AGREEMENT_ID_SEED);

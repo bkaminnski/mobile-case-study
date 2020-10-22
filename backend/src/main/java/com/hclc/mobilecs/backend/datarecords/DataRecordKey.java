@@ -1,4 +1,4 @@
-package com.hclc.mobile.backend.datarecords;
+package com.hclc.mobilecs.backend.datarecords;
 
 import org.springframework.data.cassandra.core.mapping.PrimaryKeyClass;
 import org.springframework.data.cassandra.core.mapping.PrimaryKeyColumn;
