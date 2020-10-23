@@ -3,6 +3,7 @@ package com.hclc.mobilecs.backend.datarecords;
 import java.time.ZonedDateTime;
 import java.util.*;
 
+import static java.time.temporal.ChronoUnit.DAYS;
 import static java.util.UUID.nameUUIDFromBytes;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.IntStream.range;
@@ -13,7 +14,7 @@ class DataRecordsGenerator {
     private static final long RECORDED_BYTES_SEED = 24524555;
     private static final int SECONDS_BETWEEN_RECORDS = 3600;
     private static final long MAX_BYTES_IN_RECORD = 10 * 1024 * 1024; // 10 MB
-    private static final ZonedDateTime BEGIN_TIME = ZonedDateTime.parse("2020-01-01T00:00:00+01:00[Europe/Warsaw]");
+    private static final ZonedDateTime BEGIN_TIME = ZonedDateTime.parse("2020-01-01T01:00:00+01:00[Europe/Warsaw]");
     private final Random agreementIdRandom = new Random(AGREEMENT_ID_SEED);
     private final int numberOfAgreements;
     private final int numberOfMonths;
@@ -31,7 +32,7 @@ class DataRecordsGenerator {
         Agreement agreement = new Agreement(agreementIndex);
         List<DataRecord> records = new LinkedList<>();
         ZonedDateTime recordedAt = BEGIN_TIME;
-        ZonedDateTime endTime = BEGIN_TIME.plusMonths(numberOfMonths);
+        ZonedDateTime endTime = BEGIN_TIME.plusMonths(numberOfMonths).truncatedTo(DAYS);
         while (recordedAt.isBefore(endTime)) {
             records.add(record(recordedAt, agreement));
             recordedAt = recordedAt.plusSeconds(SECONDS_BETWEEN_RECORDS);
