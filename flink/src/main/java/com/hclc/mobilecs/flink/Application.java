@@ -4,9 +4,6 @@ import org.apache.flink.api.common.functions.FilterFunction;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
-import java.sql.Date;
-
-import static java.time.Instant.now;
 import static java.time.Instant.parse;
 import static java.util.Date.from;
 
