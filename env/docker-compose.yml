@@ -10,7 +10,45 @@ services:
     image: cassandra:3.11.8
     ports:
     - "9042:9042"
+    networks:
+    - network
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:5.4.3
+    container_name: zookeeper
+    hostname: zookeeper
+    ports:
+    - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    networks:
+    - network
+
+  kafka:
+    image: confluentinc/cp-kafka:5.4.3
+    container_name: kafka
+    hostname: kafka
+    ports:
+    - "9092:9092"
+    - "29092:29092"
     expose:
-    - "9042"
+    - "9092"
+    - "29092"
+    environment:
+      KAFKA_BROKER_ID: 0
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENERS: INTERNAL://kafka:29092,LOCAL_DOCKER://kafka:9092
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:29092,LOCAL_DOCKER://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,LOCAL_DOCKER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    networks:
+    - network
+  
+  kafkacat:
+    image: confluentinc/cp-kafkacat
+    container_name: kafkacat
+    command: sleep infinity
     networks:
     - network
