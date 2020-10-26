@@ -12,3 +12,6 @@ management:
       probes:
         # enable liveness and readiness probes
         enabled: true
+
+mobilecs:
+  incoming-data-records-dir: /tmp/incoming-data-records
