@@ -1,28 +1,45 @@
 package com.hclc.mobilecs.flink;
 
-import java.util.Date;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.node.ObjectNode;
 
-public class IncomingDataRecord {
-    private final Date recordedAt;
+import java.time.ZonedDateTime;
+
+class IncomingDataRecord {
+    private final String externalId;
+    private final ZonedDateTime recordedAt;
     private final String msisdn;
     private final long recordedBytes;
 
-    public IncomingDataRecord(Date recordedAt, String msisdn, long recordedBytes) {
+    IncomingDataRecord(String externalId, ZonedDateTime recordedAt, String msisdn, long recordedBytes) {
+        this.externalId = externalId;
         this.recordedAt = recordedAt;
         this.msisdn = msisdn;
         this.recordedBytes = recordedBytes;
     }
 
-    public long getRecordedBytes() {
+    String getExternalId() {
+        return externalId;
+    }
+
+    ZonedDateTime getRecordedAt() {
+        return recordedAt;
+    }
+
+    String getMsisdn() {
+        return msisdn;
+    }
+
+    long getRecordedBytes() {
         return recordedBytes;
     }
 
-    @Override
-    public String toString() {
-        return "IncomingDataRecord{" +
-                "recordedAt=" + recordedAt +
-                ", msisdn='" + msisdn + '\'' +
-                ", recordedBytes=" + recordedBytes +
-                '}';
+    ObjectNode toObjectNode(ObjectMapper objectMapper) {
+        ObjectNode objectNode = objectMapper.createObjectNode();
+        objectNode.put("externalId", externalId);
+        objectNode.put("recordedAt", recordedAt.toString());
+        objectNode.put("msisdn", msisdn);
+        objectNode.put("recordedBytes", recordedBytes);
+        return objectNode;
     }
 }
