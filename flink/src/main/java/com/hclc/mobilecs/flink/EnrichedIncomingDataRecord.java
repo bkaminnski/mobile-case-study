@@ -1,8 +1,11 @@
 package com.hclc.mobilecs.flink;
 
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.core.JsonProcessingException;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.JsonNode;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.node.ObjectNode;
+
+import java.time.ZonedDateTime;
 
 class EnrichedIncomingDataRecord {
     private final IncomingDataRecord incomingDataRecord;
@@ -18,12 +21,40 @@ class EnrichedIncomingDataRecord {
         this.internalId = incomingDataRecord.getExternalId();
     }
 
+    EnrichedIncomingDataRecord(IncomingDataRecord incomingDataRecord, String internalId) {
+        this.incomingDataRecord = incomingDataRecord;
+        this.internalId = internalId;
+    }
+
     long getEventTimestampMillis() {
         return incomingDataRecord.getRecordedAt().toInstant().toEpochMilli();
     }
 
+    ZonedDateTime getRecordedAt() {
+        return incomingDataRecord.getRecordedAt();
+    }
+
     String getMsisdn() {
         return incomingDataRecord.getMsisdn();
+    }
+
+    long getRecordedBytes() {
+        return incomingDataRecord.getRecordedBytes();
+    }
+
+    String getInternalId() {
+        return internalId;
+    }
+
+    static EnrichedIncomingDataRecord fromJson(ObjectNode objectNode) {
+        JsonNode value = objectNode.get("value");
+        String externalId = value.get("externalId").asText();
+        ZonedDateTime recordedAt = ZonedDateTime.parse(value.get("recordedAt").asText());
+        String msisdn = value.get("msisdn").asText();
+        long recordedBytes = value.get("recordedBytes").asLong();
+        IncomingDataRecord incomingDataRecord = new IncomingDataRecord(externalId, recordedAt, msisdn, recordedBytes);
+        String internalId = value.get("internalId").asText();
+        return new EnrichedIncomingDataRecord(incomingDataRecord, internalId);
     }
 
     String toJson(ObjectMapper objectMapper) {
