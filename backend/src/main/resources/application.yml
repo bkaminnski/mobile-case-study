@@ -6,6 +6,10 @@ spring:
       local-datacenter: datacenter1
       keyspace-name: mobilecs
 
+kafka:
+  bootstrap-servers: localhost:9092
+  client-id: mobilecs-backend
+
 management:
   endpoint:
     health:
@@ -15,3 +19,6 @@ management:
 
 mobilecs:
   incoming-data-records-dir: /tmp/incoming-data-records
+  generator:
+    msisdns-batch-size: 5
+    incoming-data-records-months: 1

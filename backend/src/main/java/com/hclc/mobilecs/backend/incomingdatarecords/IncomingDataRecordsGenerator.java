@@ -7,13 +7,15 @@ import java.util.Random;
 import java.util.function.Consumer;
 import java.util.stream.IntStream;
 
+import static com.hclc.mobilecs.backend.agreements.AgreementsGenerator.MSISDN_SEED;
+import static com.hclc.mobilecs.backend.agreements.AgreementsGenerator.SERVICE_START_AT;
+import static com.hclc.mobilecs.backend.agreements.MsisdnValueGenerator.nextMsisdnValue;
 import static java.util.UUID.nameUUIDFromBytes;
 import static java.util.stream.Collectors.toList;
 
 class IncomingDataRecordsGenerator {
-    private static final long MSISDN_SEED = 84744291;
     private static final long MSISDNS_SHUFFLING_SEED = 7371661;
-    private static final long ID_SEED = 33774923;
+    private static final long INCOMING_RECORD_ID_SEED = 33774923;
     private static final long RECORDED_BYTES_SEED = 24524555;
     private static final int SECONDS_BETWEEN_RECORDS = 3600;
     private static final long MAX_BYTES_IN_RECORD = 10 * 1024 * 1024; // 10 MB
@@ -21,7 +23,7 @@ class IncomingDataRecordsGenerator {
     private final Random msisdnsShufflingRandom = new Random(MSISDNS_SHUFFLING_SEED);
     private final int numberOfMonths;
     private final List<Msisdn> msisdns;
-    private ZonedDateTime beginTime = ZonedDateTime.parse("2020-01-01T01:00:00+01:00[Europe/Warsaw]");
+    private ZonedDateTime beginTime = SERVICE_START_AT;
 
     IncomingDataRecordsGenerator(int numberOfMsisdns, int numberOfMonths) {
         this.msisdns = generateMsidns(numberOfMsisdns);
@@ -45,29 +47,25 @@ class IncomingDataRecordsGenerator {
     private void generateAtTimestamp(ZonedDateTime recordedAt, Consumer<IncomingDataRecord> recordConsumer) {
         Collections.shuffle(msisdns, msisdnsShufflingRandom);
         for (Msisdn msisdn : msisdns) {
-            IncomingDataRecord incomingDataRecord = new IncomingDataRecord(msisdn.nextId(), recordedAt, msisdn.value, msisdn.nextRecordedBytes());
+            IncomingDataRecord incomingDataRecord = new IncomingDataRecord(msisdn.nextIncomingRecordId(), recordedAt, msisdn.value, msisdn.nextRecordedBytes());
             recordConsumer.accept(incomingDataRecord);
         }
     }
 
     private class Msisdn {
         private final String value;
-        private final Random idRandom;
+        private final Random incomingRecordIdRandom;
         private final Random recordedBytesRandom;
 
         Msisdn(int index) {
-            this.value = nextValue();
-            this.idRandom = new Random(ID_SEED + index);
+            this.value = nextMsisdnValue(msisdnRandom);
+            this.incomingRecordIdRandom = new Random(INCOMING_RECORD_ID_SEED + index);
             this.recordedBytesRandom = new Random(RECORDED_BYTES_SEED + index);
         }
 
-        private String nextValue() {
-            return "48" + (long) (msisdnRandom.nextDouble() * 1000_000_000L);
-        }
-
-        String nextId() {
+        String nextIncomingRecordId() {
             byte[] buffer = new byte[8];
-            idRandom.nextBytes(buffer);
+            incomingRecordIdRandom.nextBytes(buffer);
             return nameUUIDFromBytes(buffer).toString();
         }
 

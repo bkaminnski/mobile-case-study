@@ -3,13 +3,13 @@ package com.hclc.mobilecs.backend.datarecords;
 import java.time.ZonedDateTime;
 import java.util.*;
 
+import static com.hclc.mobilecs.backend.UuidGenerator.nextUuid;
+import static com.hclc.mobilecs.backend.agreements.AgreementsGenerator.AGREEMENT_ID_SEED;
 import static java.time.temporal.ChronoUnit.DAYS;
-import static java.util.UUID.nameUUIDFromBytes;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.IntStream.range;
 
 class DataRecordsGenerator {
-    private static final long AGREEMENT_ID_SEED = 31423434;
     private static final long INTERNAL_RECORD_ID_SEED = 44134134;
     private static final long RECORDED_BYTES_SEED = 24524555;
     private static final int SECONDS_BETWEEN_RECORDS = 3600;
@@ -70,12 +70,6 @@ class DataRecordsGenerator {
 
         long nextRecordedBytes() {
             return (long) (recordedBytesRandom.nextDouble() * MAX_BYTES_IN_RECORD);
-        }
-
-        private UUID nextUuid(Random random) {
-            byte[] buffer = new byte[8];
-            random.nextBytes(buffer);
-            return nameUUIDFromBytes(buffer);
         }
     }
 }
