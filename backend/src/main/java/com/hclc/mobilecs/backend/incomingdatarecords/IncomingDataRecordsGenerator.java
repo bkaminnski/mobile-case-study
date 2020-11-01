@@ -17,13 +17,13 @@ class IncomingDataRecordsGenerator {
     private static final long MSISDNS_SHUFFLING_SEED = 7371661;
     private static final long INCOMING_RECORD_ID_SEED = 33774923;
     private static final long RECORDED_BYTES_SEED = 24524555;
-    private static final int SECONDS_BETWEEN_RECORDS = 3600;
+    private static final int SECONDS_BETWEEN_RECORDS = 3600; // 1 hr
     private static final long MAX_BYTES_IN_RECORD = 10 * 1024 * 1024; // 10 MB
     private final Random msisdnRandom = new Random(MSISDN_SEED);
     private final Random msisdnsShufflingRandom = new Random(MSISDNS_SHUFFLING_SEED);
     private final int numberOfMonths;
     private final List<Msisdn> msisdns;
-    private ZonedDateTime beginTime = SERVICE_START_AT;
+    private ZonedDateTime beginTime = SERVICE_START_AT.plusSeconds(SECONDS_BETWEEN_RECORDS);
 
     IncomingDataRecordsGenerator(int numberOfMsisdns, int numberOfMonths) {
         this.msisdns = generateMsidns(numberOfMsisdns);

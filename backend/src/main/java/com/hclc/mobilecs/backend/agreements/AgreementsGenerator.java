@@ -9,7 +9,7 @@ import static com.hclc.mobilecs.backend.UuidGenerator.nextUuid;
 import static java.util.stream.Collectors.toList;
 
 public class AgreementsGenerator {
-    public static final ZonedDateTime SERVICE_START_AT = ZonedDateTime.parse("2020-01-01T01:00:00+01:00[Europe/Warsaw]");
+    public static final ZonedDateTime SERVICE_START_AT = ZonedDateTime.parse("2020-01-01T00:00:00+01:00[Europe/Warsaw]");
     public static final long AGREEMENT_ID_SEED = 31423434;
     public static final long MSISDN_SEED = 84744291;
     private static final long SIGNED_AT_SEED = 55701923;
