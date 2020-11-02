@@ -75,7 +75,7 @@ public class IncomingDataRecordsIngester {
     private static Properties kafkaProperties() {
         Properties properties = new Properties();
         properties.setProperty("bootstrap.servers", "localhost:9092");
-        properties.setProperty("group.id", "ingester" + UUID.randomUUID().toString());
+        properties.setProperty("group.id", "ingester");
         return properties;
     }
 }
