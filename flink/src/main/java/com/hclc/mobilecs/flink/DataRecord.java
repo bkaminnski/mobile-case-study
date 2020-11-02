@@ -4,25 +4,29 @@ import com.datastax.driver.mapping.annotations.Column;
 import com.datastax.driver.mapping.annotations.Table;
 import com.datastax.driver.mapping.annotations.Transient;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.UUID;
 
 @Table(keyspace = "mobilecs", name = "data_record")
-class DataRecord {
+public class DataRecord implements Serializable {
     @Column(name = "agreement_id")
-    private final UUID agreementId;
+    private UUID agreementId;
     @Column(name = "year")
-    private final short year;
+    private short year;
     @Column(name = "month")
-    private final byte month;
+    private byte month;
     @Column(name = "recorded_at")
-    private final Date recordedAt;
+    private Date recordedAt;
     @Column(name = "internal_record_id")
-    private final UUID internalRecordId;
+    private UUID internalRecordId;
     @Column(name = "recorded_bytes")
-    private final Long recordedBytes;
+    private Long recordedBytes;
     @Transient
-    private final long maxBytesInBillingPeriod;
+    private long maxBytesInBillingPeriod;
+
+    public DataRecord() {
+    }
 
     DataRecord(Agreement agreement, EnrichedIncomingDataRecord enrichedIncomingDataRecord) {
         this.agreementId = agreement.getId();
@@ -32,5 +36,61 @@ class DataRecord {
         this.internalRecordId = UUID.fromString(enrichedIncomingDataRecord.getInternalId());
         this.recordedBytes = enrichedIncomingDataRecord.getRecordedBytes();
         this.maxBytesInBillingPeriod = agreement.getMaxBytesInBillingPeriod();
+    }
+
+    public UUID getAgreementId() {
+        return agreementId;
+    }
+
+    public void setAgreementId(UUID agreementId) {
+        this.agreementId = agreementId;
+    }
+
+    public short getYear() {
+        return year;
+    }
+
+    public void setYear(short year) {
+        this.year = year;
+    }
+
+    public byte getMonth() {
+        return month;
+    }
+
+    public void setMonth(byte month) {
+        this.month = month;
+    }
+
+    public Date getRecordedAt() {
+        return recordedAt;
+    }
+
+    public void setRecordedAt(Date recordedAt) {
+        this.recordedAt = recordedAt;
+    }
+
+    public UUID getInternalRecordId() {
+        return internalRecordId;
+    }
+
+    public void setInternalRecordId(UUID internalRecordId) {
+        this.internalRecordId = internalRecordId;
+    }
+
+    public Long getRecordedBytes() {
+        return recordedBytes;
+    }
+
+    public void setRecordedBytes(Long recordedBytes) {
+        this.recordedBytes = recordedBytes;
+    }
+
+    public long getMaxBytesInBillingPeriod() {
+        return maxBytesInBillingPeriod;
+    }
+
+    public void setMaxBytesInBillingPeriod(long maxBytesInBillingPeriod) {
+        this.maxBytesInBillingPeriod = maxBytesInBillingPeriod;
     }
 }

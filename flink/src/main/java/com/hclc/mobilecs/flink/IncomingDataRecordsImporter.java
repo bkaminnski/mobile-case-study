@@ -44,7 +44,14 @@ public class IncomingDataRecordsImporter {
         String pathString = "/tmp/incoming-data-records";
         Path filePath = new Path(pathString);
         TextInputFormat textInputFormat = new TextInputFormat(filePath);
-        textInputFormat.setFilesFilter(FilePathFilter.createDefaultFilter());
+        textInputFormat.setFilesFilter(new FilePathFilter() {
+            private final FilePathFilter defaultFilter = DefaultFilter.createDefaultFilter();
+
+            @Override
+            public boolean filterPath(Path filePath) {
+                return defaultFilter.filterPath(filePath) || filePath.getName().startsWith("tmp");
+            }
+        });
         return env.readFile(textInputFormat, pathString, PROCESS_CONTINUOUSLY, 500);
     }
 
