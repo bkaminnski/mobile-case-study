@@ -41,6 +41,7 @@ public class AgreementsGenerator {
                 MsisdnValueGenerator.nextMsisdnValue(msisdnRandom),
                 signedAt(),
                 SERVICE_START_AT,
+                "Europe/Warsaw",
                 randomMaxBytesInBillingPeriod()
         );
     }

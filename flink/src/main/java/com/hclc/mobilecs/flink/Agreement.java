@@ -11,13 +11,15 @@ class Agreement implements Comparable<Agreement> {
     private final String msisdn;
     private final ZonedDateTime signedAt;
     private final ZonedDateTime serviceStartAt;
+    private final String billingPeriodTimeZone;
     private final long maxBytesInBillingPeriod;
 
-    private Agreement(UUID id, String msisdn, ZonedDateTime signedAt, ZonedDateTime serviceStartAt, long maxBytesInBillingPeriod) {
+    private Agreement(UUID id, String msisdn, ZonedDateTime signedAt, ZonedDateTime serviceStartAt, String billingPeriodTimeZone, long maxBytesInBillingPeriod) {
         this.id = id;
         this.msisdn = msisdn;
         this.signedAt = signedAt;
         this.serviceStartAt = serviceStartAt;
+        this.billingPeriodTimeZone = billingPeriodTimeZone;
         this.maxBytesInBillingPeriod = maxBytesInBillingPeriod;
     }
 
@@ -28,6 +30,7 @@ class Agreement implements Comparable<Agreement> {
                 value.get("msisdn").asText(),
                 ZonedDateTime.parse(value.get("signedAt").asText()),
                 ZonedDateTime.parse(value.get("serviceStartAt").asText()),
+                value.get("billingPeriodTimeZone").asText(),
                 value.get("maxBytesInBillingPeriod").asLong()
         );
     }
@@ -42,6 +45,10 @@ class Agreement implements Comparable<Agreement> {
 
     ZonedDateTime getServiceStartAt() {
         return serviceStartAt;
+    }
+
+    String getBillingPeriodTimeZone() {
+        return billingPeriodTimeZone;
     }
 
     long getMaxBytesInBillingPeriod() {

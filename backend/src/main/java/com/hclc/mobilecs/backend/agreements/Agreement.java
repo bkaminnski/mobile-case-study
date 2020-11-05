@@ -12,13 +12,15 @@ class Agreement {
     private final String msisdn;
     private final ZonedDateTime signedAt;
     private final ZonedDateTime serviceStartAt;
+    private final String billingPeriodTimeZone;
     private final long maxBytesInBillingPeriod;
 
-    Agreement(UUID id, String msisdn, ZonedDateTime signedAt, ZonedDateTime serviceStartAt, long maxBytesInBillingPeriod) {
+    Agreement(UUID id, String msisdn, ZonedDateTime signedAt, ZonedDateTime serviceStartAt, String billingPeriodTimeZone, long maxBytesInBillingPeriod) {
         this.id = id;
         this.msisdn = msisdn;
         this.signedAt = signedAt;
         this.serviceStartAt = serviceStartAt;
+        this.billingPeriodTimeZone = billingPeriodTimeZone;
         this.maxBytesInBillingPeriod = maxBytesInBillingPeriod;
     }
 
@@ -41,6 +43,7 @@ class Agreement {
             objectNode.put("msisdn", msisdn);
             objectNode.put("signedAt", signedAt.toString());
             objectNode.put("serviceStartAt", serviceStartAt.toString());
+            objectNode.put("billingPeriodTimeZone", billingPeriodTimeZone);
             objectNode.put("maxBytesInBillingPeriod", maxBytesInBillingPeriod);
             return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(objectNode);
         } catch (JsonProcessingException e) {

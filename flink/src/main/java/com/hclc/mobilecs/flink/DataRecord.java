@@ -23,6 +23,8 @@ public class DataRecord implements Serializable {
     @Column(name = "recorded_bytes")
     private Long recordedBytes;
     @Transient
+    private String billingPeriodTimeZone;
+    @Transient
     private long maxBytesInBillingPeriod;
 
     public DataRecord() {
@@ -35,6 +37,7 @@ public class DataRecord implements Serializable {
         this.recordedAt = Date.from(enrichedIncomingDataRecord.getRecordedAt().toInstant());
         this.internalRecordId = UUID.fromString(enrichedIncomingDataRecord.getInternalId());
         this.recordedBytes = enrichedIncomingDataRecord.getRecordedBytes();
+        this.billingPeriodTimeZone = agreement.getBillingPeriodTimeZone();
         this.maxBytesInBillingPeriod = agreement.getMaxBytesInBillingPeriod();
     }
 
@@ -84,6 +87,14 @@ public class DataRecord implements Serializable {
 
     public void setRecordedBytes(Long recordedBytes) {
         this.recordedBytes = recordedBytes;
+    }
+
+    public String getBillingPeriodTimeZone() {
+        return billingPeriodTimeZone;
+    }
+
+    public void setBillingPeriodTimeZone(String billingPeriodTimeZone) {
+        this.billingPeriodTimeZone = billingPeriodTimeZone;
     }
 
     public long getMaxBytesInBillingPeriod() {
