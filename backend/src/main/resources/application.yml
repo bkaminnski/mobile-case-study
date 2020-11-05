@@ -20,5 +20,5 @@ management:
 mobilecs:
   incoming-data-records-dir: /tmp/incoming-data-records
   generator:
-    msisdns-batch-size: 5
+    msisdns-batch-size: 1
     incoming-data-records-months: 1

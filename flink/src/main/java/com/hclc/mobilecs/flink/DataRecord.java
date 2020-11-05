@@ -32,13 +32,33 @@ public class DataRecord implements Serializable {
 
     DataRecord(Agreement agreement, EnrichedIncomingDataRecord enrichedIncomingDataRecord) {
         this.agreementId = agreement.getId();
-        this.year = (short) enrichedIncomingDataRecord.getRecordedAt().getYear();
-        this.month = (byte) enrichedIncomingDataRecord.getRecordedAt().getMonth().getValue();
+        this.year = (short) enrichedIncomingDataRecord.getYear();
+        this.month = (byte) enrichedIncomingDataRecord.getMonth();
         this.recordedAt = Date.from(enrichedIncomingDataRecord.getRecordedAt().toInstant());
         this.internalRecordId = UUID.fromString(enrichedIncomingDataRecord.getInternalId());
         this.recordedBytes = enrichedIncomingDataRecord.getRecordedBytes();
         this.billingPeriodTimeZone = agreement.getBillingPeriodTimeZone();
         this.maxBytesInBillingPeriod = agreement.getMaxBytesInBillingPeriod();
+    }
+
+    public DataRecord plusRecordedBytes(DataRecord other) {
+        DataRecord dataRecord = new DataRecord();
+        dataRecord.setAgreementId(agreementId);
+        dataRecord.setYear(year);
+        dataRecord.setMonth(month);
+        dataRecord.setRecordedAt(recordedAt);
+        dataRecord.setInternalRecordId(internalRecordId);
+        dataRecord.setRecordedBytes(this.recordedBytes + other.recordedBytes);
+        dataRecord.setBillingPeriodTimeZone(billingPeriodTimeZone);
+        dataRecord.setMaxBytesInBillingPeriod(maxBytesInBillingPeriod);
+        return dataRecord;
+    }
+
+    public DataRecord laterPlusRecordedBytes(DataRecord other) {
+        if (this.recordedAt.after(other.recordedAt)) {
+            return this.plusRecordedBytes(other);
+        }
+        return other.plusRecordedBytes(this);
     }
 
     public UUID getAgreementId() {
@@ -103,5 +123,9 @@ public class DataRecord implements Serializable {
 
     public void setMaxBytesInBillingPeriod(long maxBytesInBillingPeriod) {
         this.maxBytesInBillingPeriod = maxBytesInBillingPeriod;
+    }
+
+    public boolean exceedsDataPlan() {
+        return recordedBytes >= maxBytesInBillingPeriod;
     }
 }

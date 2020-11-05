@@ -36,7 +36,7 @@ public class BillingPeriodWindowAssigner extends WindowAssigner<DataRecord, Time
     public Trigger<DataRecord, TimeWindow> getDefaultTrigger(StreamExecutionEnvironment env) {
         return null;
     }
-    
+
     @Override
     public String toString() {
         return "BillingPeriodWindowAssigner";

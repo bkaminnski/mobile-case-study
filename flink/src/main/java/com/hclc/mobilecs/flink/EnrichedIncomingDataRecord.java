@@ -46,6 +46,14 @@ class EnrichedIncomingDataRecord {
         return internalId;
     }
 
+    int getYear() {
+        return incomingDataRecord.getRecordedAt().minusSeconds(1).getYear();
+    }
+
+    int getMonth() {
+        return incomingDataRecord.getRecordedAt().minusSeconds(1).getMonth().getValue();
+    }
+
     static EnrichedIncomingDataRecord fromJson(ObjectNode objectNode) {
         JsonNode value = objectNode.get("value");
         String externalId = value.get("externalId").asText();
