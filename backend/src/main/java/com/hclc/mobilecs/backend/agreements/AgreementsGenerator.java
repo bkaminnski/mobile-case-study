@@ -15,9 +15,8 @@ public class AgreementsGenerator {
     private static final long SIGNED_AT_SEED = 55701923;
     private static final long PLAN_SEED = 73244573;
     private static final List<Long> MAX_BYTES_PLANS = List.of(
-            1024 * 1024 * 1024L, // 1 GB
             5 * 1024 * 1024 * 1024L, // 5 GB
-            20 * 1024 * 1024 * 1024L // 20 GB
+            10 * 1024 * 1024 * 1024L // 10 GB
     );
     private final Random agreementIdRandom = new Random(AGREEMENT_ID_SEED);
     private final Random signedAtRandom = new Random(SIGNED_AT_SEED);

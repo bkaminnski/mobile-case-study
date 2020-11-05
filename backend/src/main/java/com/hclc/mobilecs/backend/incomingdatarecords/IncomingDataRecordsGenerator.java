@@ -17,8 +17,8 @@ class IncomingDataRecordsGenerator {
     private static final long MSISDNS_SHUFFLING_SEED = 7371661;
     private static final long INCOMING_RECORD_ID_SEED = 33774923;
     private static final long RECORDED_BYTES_SEED = 24524555;
-    private static final int SECONDS_BETWEEN_RECORDS = 3600; // 1 hr
-    private static final long MAX_BYTES_IN_RECORD = 10 * 1024 * 1024; // 10 MB
+    private static final int SECONDS_BETWEEN_RECORDS = 3600 * 24; // 24 hr
+    private static final long MAX_BYTES_IN_RECORD = 1024 * 1024 * 1024; // 1 GB
     private final Random msisdnRandom = new Random(MSISDN_SEED);
     private final Random msisdnsShufflingRandom = new Random(MSISDNS_SHUFFLING_SEED);
     private final int numberOfMonths;
