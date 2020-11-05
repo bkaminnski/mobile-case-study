@@ -5,6 +5,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
+import java.time.ZonedDateTime;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.UUID;
@@ -30,7 +31,23 @@ class AgreementsGeneratorService {
     String generate() {
         List<Agreement> agreements = agreementsGenerator.generate();
         agreements.forEach(this::sendToKafka);
+        applyFlinkWorkaroundForConnectedStreams();
         return summarized(agreements);
+    }
+
+    private void applyFlinkWorkaroundForConnectedStreams() {
+        sendToKafka(agreementInFarFuture());
+    }
+
+    private Agreement agreementInFarFuture() {
+        return new Agreement(
+                UUID.randomUUID(),
+                "48000000000",
+                ZonedDateTime.parse("2999-01-01T00:00:00+01:00[Europe/Warsaw]"),
+                ZonedDateTime.parse("2999-01-01T00:00:00+01:00[Europe/Warsaw]"),
+                "Europe/Warsaw",
+                0
+        );
     }
 
     private void sendToKafka(Agreement agreement) {

@@ -12,6 +12,8 @@ import org.apache.flink.streaming.util.serialization.JSONKeyValueDeserialization
 
 import java.util.Properties;
 
+import static java.time.Duration.of;
+import static java.time.temporal.ChronoUnit.SECONDS;
 import static org.apache.flink.streaming.api.TimeCharacteristic.EventTime;
 
 public class IncomingDataRecordsIngester {
@@ -56,7 +58,8 @@ public class IncomingDataRecordsIngester {
                 kafkaProperties()
         );
         agreementsKafkaConsumer.setStartFromEarliest();
-        agreementsKafkaConsumer.assignTimestampsAndWatermarks(WatermarkStrategy.forMonotonousTimestamps());
+        WatermarkStrategy<ObjectNode> watermarkStrategy = WatermarkStrategy.<ObjectNode>forMonotonousTimestamps().withIdleness(of(1, SECONDS));
+        agreementsKafkaConsumer.assignTimestampsAndWatermarks(watermarkStrategy);
         return env.addSource(agreementsKafkaConsumer);
     }
 

@@ -1,9 +1,13 @@
 package com.hclc.mobilecs.flink;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.UUID;
 
+import static java.math.RoundingMode.HALF_UP;
+
 class DataRecordAggregate {
+    private static final BigDecimal GIGABYTE = new BigDecimal(1024L * 1024 * 1024);
     private final UUID agreementId;
     private final short year;
     private final byte month;
@@ -37,8 +41,10 @@ class DataRecordAggregate {
                 ", agreementId=" + agreementId +
                 ", latestRecordedAt=" + latestRecordedAt +
                 ", latestInternalRecordId=" + latestInternalRecordId +
-                ", totalRecordedBytes=" + totalRecordedBytes +
-                ", maxBytesInBillingPeriod=" + maxBytesInBillingPeriod +
+                ", totalRecordedBytes [GB]=" + new BigDecimal(totalRecordedBytes).divide(GIGABYTE, 2, HALF_UP) +
+                ", maxBytesInBillingPeriod [GB]=" + new BigDecimal(maxBytesInBillingPeriod).divide(GIGABYTE, 2, HALF_UP) +
+                ", totalRecordedBytes [B]=" + totalRecordedBytes +
+                ", maxBytesInBillingPeriod [B]=" + maxBytesInBillingPeriod +
                 '}';
     }
 }
