@@ -11,8 +11,8 @@ import static com.hclc.mobilecs.flink.DataRecordAggregate.AggregateType.DATA_PLA
 import static java.lang.Boolean.TRUE;
 
 public class DataUsageWindowFunction extends ProcessWindowFunction<DataRecord, DataRecordAggregate, String, TimeWindow> {
-    private final ValueStateDescriptor<Boolean> alreadyFiredDescriptor = new ValueStateDescriptor<>(
-            "alreadyFiredDueToExceededPlan", Boolean.class
+    private final ValueStateDescriptor<Boolean> alreadyEmittedDescriptor = new ValueStateDescriptor<>(
+            "alreadyEmittedDueToExceededPlan", Boolean.class
     );
 
     @Override
@@ -21,9 +21,9 @@ public class DataUsageWindowFunction extends ProcessWindowFunction<DataRecord, D
         if (latestDataRecordAggregatingRecordedBytes == null) {
             return;
         }
-        ValueState<Boolean> alreadyFired = context.windowState().getState(alreadyFiredDescriptor);
-        if (latestDataRecordAggregatingRecordedBytes.exceedsDataPlan() && (alreadyFired.value() == null && !alreadyFired.value())) {
-            alreadyFired.update(TRUE);
+        ValueState<Boolean> alreadyEmitted = context.windowState().getState(alreadyEmittedDescriptor);
+        if (latestDataRecordAggregatingRecordedBytes.exceedsDataPlan() && (alreadyEmitted.value() == null || !alreadyEmitted.value())) {
+            alreadyEmitted.update(TRUE);
             out.collect(new DataRecordAggregate(latestDataRecordAggregatingRecordedBytes, DATA_PLAN_EXCEEDED));
         }
         if (context.currentWatermark() >= context.window().maxTimestamp()) {
@@ -33,6 +33,7 @@ public class DataUsageWindowFunction extends ProcessWindowFunction<DataRecord, D
 
     @Override
     public void clear(Context context) throws Exception {
+        context.windowState().getState(alreadyEmittedDescriptor).clear();
         super.clear(context);
     }
 }
