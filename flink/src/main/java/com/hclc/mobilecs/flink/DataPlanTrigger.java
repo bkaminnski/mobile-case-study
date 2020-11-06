@@ -57,5 +57,7 @@ public class DataPlanTrigger extends Trigger<DataRecord, TimeWindow> {
     @Override
     public void clear(TimeWindow window, TriggerContext ctx) throws Exception {
         ctx.deleteEventTimeTimer(window.maxTimestamp());
+        ctx.getPartitionedState(recordedBytesDescriptor).clear();
+        ctx.getPartitionedState(alreadyFiredDescriptor).clear();
     }
 }

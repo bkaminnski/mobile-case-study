@@ -34,6 +34,5 @@ public class DataUsageWindowFunction extends ProcessWindowFunction<DataRecord, D
     @Override
     public void clear(Context context) throws Exception {
         context.windowState().getState(alreadyEmittedDescriptor).clear();
-        super.clear(context);
     }
 }
