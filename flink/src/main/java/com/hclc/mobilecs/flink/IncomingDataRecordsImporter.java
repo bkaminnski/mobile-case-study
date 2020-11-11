@@ -20,7 +20,7 @@ import static org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer.Sem
 
 public class IncomingDataRecordsImporter {
     private static final String INCOMING_DATA_RECORDS_TOPIC = "incoming-data-records";
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     public static void main(String[] args) throws Exception {
         StreamExecutionEnvironment env = createExecutionEnvironment();
@@ -29,8 +29,9 @@ public class IncomingDataRecordsImporter {
                 .map(IncomingDataRecordsImporter::toIncomingDataRecords)
                 .map(IncomingDataRecordsImporter::toEnrichedIncomingDataRecords)
                 .assignTimestampsAndWatermarks(noWatermarkWithTimestampAssigner())
-                .addSink(kafkaProducer());
-        env.execute();
+                .addSink(kafkaProducer())
+                .name("Kafka [" + INCOMING_DATA_RECORDS_TOPIC + "]");
+        env.execute("Incoming Data Records Importer");
     }
 
     private static StreamExecutionEnvironment createExecutionEnvironment() {
@@ -83,7 +84,7 @@ public class IncomingDataRecordsImporter {
                 null,
                 timestamp,
                 enrichedIncomingDataRecord.getMsisdn().getBytes(UTF_8),
-                enrichedIncomingDataRecord.toJson(OBJECT_MAPPER).getBytes(UTF_8)
+                enrichedIncomingDataRecord.toJson(objectMapper).getBytes(UTF_8)
         );
     }
 

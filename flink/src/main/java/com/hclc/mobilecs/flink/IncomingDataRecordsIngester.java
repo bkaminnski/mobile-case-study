@@ -1,22 +1,29 @@
 package com.hclc.mobilecs.flink;
 
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.datastream.KeyedStream;
-import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.connectors.cassandra.CassandraSink;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer;
+import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
 import org.apache.flink.streaming.util.serialization.JSONKeyValueDeserializationSchema;
+import org.apache.kafka.clients.producer.ProducerRecord;
 
 import java.util.Properties;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.time.Duration.of;
 import static java.time.temporal.ChronoUnit.SECONDS;
 import static org.apache.flink.streaming.api.TimeCharacteristic.EventTime;
+import static org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer.Semantic.EXACTLY_ONCE;
 
 public class IncomingDataRecordsIngester {
+    private static final String DATA_RECORD_AGGREGATES_TOPIC = "data-records-aggregates";
+    private static final ObjectMapper objectMapper = new ObjectMapper();
+
     public static void main(String[] args) throws Exception {
         StreamExecutionEnvironment env = createExecutionEnvironment();
 
@@ -29,14 +36,14 @@ public class IncomingDataRecordsIngester {
                 .setHost("127.0.0.1")
                 .build();
 
-        SingleOutputStreamOperator<DataRecordAggregate> aggregatedDataRecords = dataRecordsStream
+        dataRecordsStream
                 .window(new BillingPeriodWindowAssigner())
                 .trigger(new DataPlanTrigger())
-                .aggregate(new LatestDataRecordAggregatingRecordedBytes(), new DataUsageWindowFunction());
+                .aggregate(new LatestDataRecordAggregatingRecordedBytes(), new DataUsageWindowFunction())
+                .addSink(kafkaProducer())
+                .name("Kafka [" + DATA_RECORD_AGGREGATES_TOPIC + "]");
 
-        aggregatedDataRecords.print();
-
-        env.execute();
+        env.execute("Incoming Data Records Ingester");
     }
 
     private static StreamExecutionEnvironment createExecutionEnvironment() {
@@ -55,7 +62,7 @@ public class IncomingDataRecordsIngester {
         FlinkKafkaConsumer<ObjectNode> agreementsKafkaConsumer = new FlinkKafkaConsumer<>(
                 "agreements",
                 new JSONKeyValueDeserializationSchema(true),
-                kafkaProperties()
+                kafkaConsumerProperties()
         );
         agreementsKafkaConsumer.setStartFromEarliest();
         WatermarkStrategy<ObjectNode> watermarkStrategy = WatermarkStrategy.<ObjectNode>forMonotonousTimestamps().withIdleness(of(1, SECONDS));
@@ -81,7 +88,7 @@ public class IncomingDataRecordsIngester {
         FlinkKafkaConsumer<ObjectNode> incomingDataRecordsKafkaConsumer = new FlinkKafkaConsumer<>(
                 "incoming-data-records",
                 new JSONKeyValueDeserializationSchema(true),
-                kafkaProperties());
+                kafkaConsumerProperties());
         incomingDataRecordsKafkaConsumer.assignTimestampsAndWatermarks(WatermarkStrategy.forMonotonousTimestamps());
         return env.addSource(incomingDataRecordsKafkaConsumer);
     }
@@ -94,7 +101,7 @@ public class IncomingDataRecordsIngester {
         return value.getMsisdn();
     }
 
-    private static Properties kafkaProperties() {
+    private static Properties kafkaConsumerProperties() {
         Properties properties = new Properties();
         properties.setProperty("bootstrap.servers", "localhost:9092");
         properties.setProperty("group.id", "ingester");
@@ -103,5 +110,29 @@ public class IncomingDataRecordsIngester {
 
     private static String agreementIdInDataRecord(DataRecord value) throws Exception {
         return value.getAgreementId().toString();
+    }
+
+    private static FlinkKafkaProducer<DataRecordAggregate> kafkaProducer() {
+        return new FlinkKafkaProducer<>(
+                DATA_RECORD_AGGREGATES_TOPIC,
+                IncomingDataRecordsIngester::toProducerRecord,
+                kafkaProducerProperties(),
+                EXACTLY_ONCE);
+    }
+
+    private static ProducerRecord<byte[], byte[]> toProducerRecord(DataRecordAggregate dataRecordAggregate, Long timestamp) {
+        return new ProducerRecord<>(
+                DATA_RECORD_AGGREGATES_TOPIC,
+                null,
+                timestamp,
+                dataRecordAggregate.getAgreementId().toString().getBytes(UTF_8),
+                dataRecordAggregate.toJson(objectMapper).getBytes(UTF_8)
+        );
+    }
+
+    private static Properties kafkaProducerProperties() {
+        Properties properties = new Properties();
+        properties.setProperty("bootstrap.servers", "localhost:9092");
+        return properties;
     }
 }

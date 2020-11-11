@@ -1,10 +1,12 @@
 package com.hclc.mobilecs.flink;
 
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.core.JsonProcessingException;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.node.ObjectNode;
+
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.UUID;
-
-import static java.math.RoundingMode.HALF_UP;
 
 class DataRecordAggregate {
     private static final BigDecimal GIGABYTE = new BigDecimal(1024L * 1024 * 1024);
@@ -30,21 +32,29 @@ class DataRecordAggregate {
         this.type = type;
     }
 
-    enum AggregateType {
-        DATA_PLAN_EXCEEDED, BILLING_PERIOD_CLOSED
+    UUID getAgreementId() {
+        return agreementId;
     }
 
-    @Override
-    public String toString() {
-        return "DataRecordAggregate{" +
-                "type=" + type +
-                ", agreementId=" + agreementId +
-                ", latestRecordedAt=" + latestRecordedAt +
-                ", latestInternalRecordId=" + latestInternalRecordId +
-                ", totalRecordedBytes [GB]=" + new BigDecimal(totalRecordedBytes).divide(GIGABYTE, 2, HALF_UP) +
-                ", maxBytesInBillingPeriod [GB]=" + new BigDecimal(maxBytesInBillingPeriod).divide(GIGABYTE, 2, HALF_UP) +
-                ", totalRecordedBytes [B]=" + totalRecordedBytes +
-                ", maxBytesInBillingPeriod [B]=" + maxBytesInBillingPeriod +
-                '}';
+    String toJson(ObjectMapper objectMapper) {
+        try {
+            ObjectNode objectNode = objectMapper.createObjectNode();
+            objectNode.put("agreementId", agreementId.toString());
+            objectNode.put("year", year);
+            objectNode.put("month", month);
+            objectNode.put("latestRecordedAt", latestRecordedAt.toString());
+            objectNode.put("latestInternalRecordId", latestInternalRecordId.toString());
+            objectNode.put("totalRecordedBytes", totalRecordedBytes);
+            objectNode.put("billingPeriodTimeZone", billingPeriodTimeZone);
+            objectNode.put("maxBytesInBillingPeriod", maxBytesInBillingPeriod);
+            objectNode.put("type", type.name());
+            return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(objectNode);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    enum AggregateType {
+        DATA_PLAN_EXCEEDED, BILLING_PERIOD_CLOSED
     }
 }
