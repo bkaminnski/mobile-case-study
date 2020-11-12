@@ -22,7 +22,7 @@ class AgreementsGeneratorService {
 
     AgreementsGeneratorService(Environment env, KafkaTemplate<String, String> kafkaTemplate, ObjectMapper objectMapper) {
         this.agreementsGenerator = new AgreementsGenerator(
-                parseInt(env.getProperty("mobilecs.generator.msisdns-batch-size"))
+                parseInt(env.getProperty("mobilecs.generator.batch-size"))
         );
         this.kafkaTemplate = kafkaTemplate;
         this.objectMapper = objectMapper;

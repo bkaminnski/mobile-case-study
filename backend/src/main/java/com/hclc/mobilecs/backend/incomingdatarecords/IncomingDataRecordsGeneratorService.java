@@ -16,7 +16,7 @@ class IncomingDataRecordsGeneratorService {
     IncomingDataRecordsGeneratorService(Environment env) {
         this.filesCreator = new IncomingDataRecordsFilesCreator(env.getProperty("mobilecs.incoming-data-records-dir"));
         this.recordsGenerator = new IncomingDataRecordsGenerator(
-                parseInt(env.getProperty("mobilecs.generator.msisdns-batch-size")),
+                parseInt(env.getProperty("mobilecs.generator.batch-size")),
                 parseInt(env.getProperty("mobilecs.generator.incoming-data-records-months"))
         );
     }
