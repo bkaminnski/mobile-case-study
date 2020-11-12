@@ -1,15 +1,13 @@
-package com.hclc.mobilecs.flink;
+package com.hclc.mobilecs.flink.ingesting.model;
 
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.node.ObjectNode;
 
-import java.math.BigDecimal;
 import java.util.Date;
 import java.util.UUID;
 
-class DataRecordAggregate {
-    private static final BigDecimal GIGABYTE = new BigDecimal(1024L * 1024 * 1024);
+public class DataRecordAggregate {
     private final UUID agreementId;
     private final short year;
     private final byte month;
@@ -20,7 +18,7 @@ class DataRecordAggregate {
     private final long maxBytesInBillingPeriod;
     private final AggregateType type;
 
-    DataRecordAggregate(DataRecord dataRecord, AggregateType type) {
+    public DataRecordAggregate(DataRecord dataRecord, AggregateType type) {
         this.agreementId = dataRecord.getAgreementId();
         this.year = dataRecord.getYear();
         this.month = dataRecord.getMonth();
@@ -32,11 +30,11 @@ class DataRecordAggregate {
         this.type = type;
     }
 
-    UUID getAgreementId() {
+    public UUID getAgreementId() {
         return agreementId;
     }
 
-    String toJson(ObjectMapper objectMapper) {
+    public String toJson(ObjectMapper objectMapper) {
         try {
             ObjectNode objectNode = objectMapper.createObjectNode();
             objectNode.put("agreementId", agreementId.toString());
@@ -54,7 +52,7 @@ class DataRecordAggregate {
         }
     }
 
-    enum AggregateType {
+    public enum AggregateType {
         DATA_PLAN_EXCEEDED, BILLING_PERIOD_CLOSED
     }
 }

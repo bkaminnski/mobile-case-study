@@ -1,5 +1,8 @@
-package com.hclc.mobilecs.flink;
+package com.hclc.mobilecs.flink.ingesting;
 
+import com.hclc.mobilecs.flink.importing.model.EnrichedIncomingDataRecord;
+import com.hclc.mobilecs.flink.ingesting.model.Agreement;
+import com.hclc.mobilecs.flink.ingesting.model.DataRecord;
 import org.apache.flink.api.common.state.ListStateDescriptor;
 import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.streaming.api.operators.co.CoStreamFlatMap;
@@ -10,9 +13,9 @@ import org.junit.jupiter.api.Test;
 import java.time.ZonedDateTime;
 import java.util.List;
 
-import static com.hclc.mobilecs.flink.AgreementTestBuilder.anAgreement;
-import static com.hclc.mobilecs.flink.DataRecordTestBuilder.aDataRecord;
-import static com.hclc.mobilecs.flink.EnrichedIncomingDataRecordTestBuilder.anEnrichedIncomingDataRecord;
+import static com.hclc.mobilecs.flink.importing.model.EnrichedIncomingDataRecordTestBuilder.anEnrichedIncomingDataRecord;
+import static com.hclc.mobilecs.flink.ingesting.model.AgreementTestBuilder.anAgreement;
+import static com.hclc.mobilecs.flink.ingesting.model.DataRecordTestBuilder.aDataRecord;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class MatchingFunctionTest {

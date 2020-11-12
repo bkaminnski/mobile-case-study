@@ -1,5 +1,9 @@
-package com.hclc.mobilecs.flink;
+package com.hclc.mobilecs.flink.ingesting;
 
+import com.hclc.mobilecs.flink.importing.model.EnrichedIncomingDataRecord;
+import com.hclc.mobilecs.flink.ingesting.model.Agreement;
+import com.hclc.mobilecs.flink.ingesting.model.DataRecord;
+import com.hclc.mobilecs.flink.ingesting.model.DataRecordAggregate;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.node.ObjectNode;

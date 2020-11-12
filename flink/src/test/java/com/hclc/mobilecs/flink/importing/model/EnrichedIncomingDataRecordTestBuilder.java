@@ -1,4 +1,4 @@
-package com.hclc.mobilecs.flink;
+package com.hclc.mobilecs.flink.importing.model;
 
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -7,7 +7,7 @@ import java.util.UUID;
 
 import static com.hclc.mobilecs.flink.Fixtures.*;
 
-class EnrichedIncomingDataRecordTestBuilder {
+public class EnrichedIncomingDataRecordTestBuilder {
     private UUID externalId = IRRELEVANT_UUID;
     private ZonedDateTime recordedAt = IRRELEVANT_TIMESTAMP;
     private String msisdn = IRRELEVANT_STRING;
@@ -17,16 +17,16 @@ class EnrichedIncomingDataRecordTestBuilder {
     private EnrichedIncomingDataRecordTestBuilder() {
     }
 
-    static EnrichedIncomingDataRecordTestBuilder anEnrichedIncomingDataRecord() {
+    public static EnrichedIncomingDataRecordTestBuilder anEnrichedIncomingDataRecord() {
         return new EnrichedIncomingDataRecordTestBuilder();
     }
 
-    EnrichedIncomingDataRecordTestBuilder recordedAt(ZonedDateTime recordedAt) {
+    public EnrichedIncomingDataRecordTestBuilder recordedAt(ZonedDateTime recordedAt) {
         this.recordedAt = recordedAt;
         return this;
     }
 
-    EnrichedIncomingDataRecord build() {
+    public EnrichedIncomingDataRecord build() {
         ObjectNode objectNode = objectMapper.createObjectNode();
         objectNode.put("externalId", externalId.toString());
         objectNode.put("recordedAt", recordedAt.toString());

@@ -1,8 +1,9 @@
-package com.hclc.mobilecs.flink;
+package com.hclc.mobilecs.flink.ingesting.model;
 
 import com.datastax.driver.mapping.annotations.Column;
 import com.datastax.driver.mapping.annotations.Table;
 import com.datastax.driver.mapping.annotations.Transient;
+import com.hclc.mobilecs.flink.importing.model.EnrichedIncomingDataRecord;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -30,7 +31,7 @@ public class DataRecord implements Serializable {
     public DataRecord() {
     }
 
-    DataRecord(Agreement agreement, EnrichedIncomingDataRecord enrichedIncomingDataRecord) {
+    public DataRecord(Agreement agreement, EnrichedIncomingDataRecord enrichedIncomingDataRecord) {
         this.agreementId = agreement.getId();
         this.year = (short) enrichedIncomingDataRecord.getYear();
         this.month = (byte) enrichedIncomingDataRecord.getMonth();

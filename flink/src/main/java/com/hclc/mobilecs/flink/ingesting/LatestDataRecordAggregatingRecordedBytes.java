@@ -1,5 +1,6 @@
-package com.hclc.mobilecs.flink;
+package com.hclc.mobilecs.flink.ingesting;
 
+import com.hclc.mobilecs.flink.ingesting.model.DataRecord;
 import org.apache.flink.api.common.functions.AggregateFunction;
 
 public class LatestDataRecordAggregatingRecordedBytes implements AggregateFunction<DataRecord, DataRecord, DataRecord> {

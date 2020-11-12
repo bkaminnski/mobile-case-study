@@ -1,13 +1,15 @@
-package com.hclc.mobilecs.flink;
+package com.hclc.mobilecs.flink.ingesting;
 
+import com.hclc.mobilecs.flink.ingesting.model.DataRecord;
+import com.hclc.mobilecs.flink.ingesting.model.DataRecordAggregate;
 import org.apache.flink.api.common.state.ValueState;
 import org.apache.flink.api.common.state.ValueStateDescriptor;
 import org.apache.flink.streaming.api.functions.windowing.ProcessWindowFunction;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.apache.flink.util.Collector;
 
-import static com.hclc.mobilecs.flink.DataRecordAggregate.AggregateType.BILLING_PERIOD_CLOSED;
-import static com.hclc.mobilecs.flink.DataRecordAggregate.AggregateType.DATA_PLAN_EXCEEDED;
+import static com.hclc.mobilecs.flink.ingesting.model.DataRecordAggregate.AggregateType.BILLING_PERIOD_CLOSED;
+import static com.hclc.mobilecs.flink.ingesting.model.DataRecordAggregate.AggregateType.DATA_PLAN_EXCEEDED;
 import static java.lang.Boolean.TRUE;
 
 public class DataUsageWindowFunction extends ProcessWindowFunction<DataRecord, DataRecordAggregate, String, TimeWindow> {

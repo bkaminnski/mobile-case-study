@@ -1,12 +1,13 @@
-package com.hclc.mobilecs.flink;
+package com.hclc.mobilecs.flink.ingesting;
 
+import com.hclc.mobilecs.flink.ingesting.model.DataRecord;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.junit.jupiter.api.Test;
 
 import java.time.ZonedDateTime;
 import java.util.Collection;
 
-import static com.hclc.mobilecs.flink.DataRecordTestBuilder.aDataRecord;
+import static com.hclc.mobilecs.flink.ingesting.model.DataRecordTestBuilder.aDataRecord;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class BillingPeriodWindowAssignerTest {

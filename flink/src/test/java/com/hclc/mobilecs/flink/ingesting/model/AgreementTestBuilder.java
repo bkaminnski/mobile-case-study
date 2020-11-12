@@ -1,4 +1,4 @@
-package com.hclc.mobilecs.flink;
+package com.hclc.mobilecs.flink.ingesting.model;
 
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -7,7 +7,7 @@ import java.util.UUID;
 
 import static com.hclc.mobilecs.flink.Fixtures.*;
 
-class AgreementTestBuilder {
+public class AgreementTestBuilder {
     private UUID id = IRRELEVANT_UUID;
     private String msisdn = IRRELEVANT_STRING;
     private ZonedDateTime signedAt = IRRELEVANT_TIMESTAMP;
@@ -18,16 +18,16 @@ class AgreementTestBuilder {
     private AgreementTestBuilder() {
     }
 
-    static AgreementTestBuilder anAgreement() {
+    public static AgreementTestBuilder anAgreement() {
         return new AgreementTestBuilder();
     }
 
-    AgreementTestBuilder signedAt(ZonedDateTime signedAt) {
+    public AgreementTestBuilder signedAt(ZonedDateTime signedAt) {
         this.signedAt = signedAt;
         return this;
     }
 
-    AgreementTestBuilder withServiceStartAt(ZonedDateTime serviceStartAt) {
+    public AgreementTestBuilder withServiceStartAt(ZonedDateTime serviceStartAt) {
         this.serviceStartAt = serviceStartAt;
         return this;
     }
@@ -37,7 +37,7 @@ class AgreementTestBuilder {
         return this;
     }
 
-    Agreement build() {
+    public Agreement build() {
         ObjectNode objectNode = objectMapper.createObjectNode();
         objectNode.put("id", id.toString());
         objectNode.put("msisdn", msisdn);

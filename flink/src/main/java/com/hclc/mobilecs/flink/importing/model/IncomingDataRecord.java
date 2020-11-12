@@ -1,17 +1,17 @@
-package com.hclc.mobilecs.flink;
+package com.hclc.mobilecs.flink.importing.model;
 
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.time.ZonedDateTime;
 
-class IncomingDataRecord {
+public class IncomingDataRecord {
     private final String externalId;
     private final ZonedDateTime recordedAt;
     private final String msisdn;
     private final long recordedBytes;
 
-    IncomingDataRecord(String externalId, ZonedDateTime recordedAt, String msisdn, long recordedBytes) {
+    public IncomingDataRecord(String externalId, ZonedDateTime recordedAt, String msisdn, long recordedBytes) {
         this.externalId = externalId;
         this.recordedAt = recordedAt;
         this.msisdn = msisdn;

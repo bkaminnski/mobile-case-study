@@ -1,4 +1,4 @@
-package com.hclc.mobilecs.flink;
+package com.hclc.mobilecs.flink.importing.model;
 
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.JsonNode;
@@ -7,11 +7,11 @@ import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.node.Obje
 
 import java.time.ZonedDateTime;
 
-class EnrichedIncomingDataRecord {
+public class EnrichedIncomingDataRecord {
     private final IncomingDataRecord incomingDataRecord;
     private final String internalId;
 
-    EnrichedIncomingDataRecord(IncomingDataRecord incomingDataRecord) {
+    public EnrichedIncomingDataRecord(IncomingDataRecord incomingDataRecord) {
         this.incomingDataRecord = incomingDataRecord;
         // In production system, external id could be anything, not necessarily globally unique.
         // To guarantee global uniqueness, each imported record would receive a new UUID.
@@ -26,35 +26,35 @@ class EnrichedIncomingDataRecord {
         this.internalId = internalId;
     }
 
-    long getEventTimestampMillis() {
+    public long getEventTimestampMillis() {
         return incomingDataRecord.getRecordedAt().toInstant().toEpochMilli();
     }
 
-    ZonedDateTime getRecordedAt() {
+    public ZonedDateTime getRecordedAt() {
         return incomingDataRecord.getRecordedAt();
     }
 
-    String getMsisdn() {
+    public String getMsisdn() {
         return incomingDataRecord.getMsisdn();
     }
 
-    long getRecordedBytes() {
+    public long getRecordedBytes() {
         return incomingDataRecord.getRecordedBytes();
     }
 
-    String getInternalId() {
+    public String getInternalId() {
         return internalId;
     }
 
-    int getYear() {
+    public int getYear() {
         return incomingDataRecord.getRecordedAt().minusSeconds(1).getYear();
     }
 
-    int getMonth() {
+    public int getMonth() {
         return incomingDataRecord.getRecordedAt().minusSeconds(1).getMonth().getValue();
     }
 
-    static EnrichedIncomingDataRecord fromJson(ObjectNode objectNode) {
+    public static EnrichedIncomingDataRecord fromJson(ObjectNode objectNode) {
         JsonNode value = objectNode.get("value");
         String externalId = value.get("externalId").asText();
         ZonedDateTime recordedAt = ZonedDateTime.parse(value.get("recordedAt").asText());
@@ -65,7 +65,7 @@ class EnrichedIncomingDataRecord {
         return new EnrichedIncomingDataRecord(incomingDataRecord, internalId);
     }
 
-    String toJson(ObjectMapper objectMapper) {
+    public String toJson(ObjectMapper objectMapper) {
         try {
             ObjectNode objectNode = objectMapper.createObjectNode();
             objectNode.setAll(incomingDataRecord.toObjectNode(objectMapper));

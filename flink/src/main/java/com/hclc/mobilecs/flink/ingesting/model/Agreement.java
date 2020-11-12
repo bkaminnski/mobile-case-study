@@ -1,4 +1,4 @@
-package com.hclc.mobilecs.flink;
+package com.hclc.mobilecs.flink.ingesting.model;
 
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.JsonNode;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.node.ObjectNode;
@@ -6,7 +6,7 @@ import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.node.Obje
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
-class Agreement implements Comparable<Agreement> {
+public class Agreement implements Comparable<Agreement> {
     private final UUID id;
     private final String msisdn;
     private final ZonedDateTime signedAt;
@@ -23,7 +23,7 @@ class Agreement implements Comparable<Agreement> {
         this.maxBytesInBillingPeriod = maxBytesInBillingPeriod;
     }
 
-    static Agreement fromJson(ObjectNode objectNode) {
+    public static Agreement fromJson(ObjectNode objectNode) {
         JsonNode value = objectNode.get("value");
         return new Agreement(
                 UUID.fromString(value.get("id").asText()),
@@ -39,11 +39,11 @@ class Agreement implements Comparable<Agreement> {
         return id;
     }
 
-    String getMsisdn() {
+    public String getMsisdn() {
         return msisdn;
     }
 
-    ZonedDateTime getServiceStartAt() {
+    public ZonedDateTime getServiceStartAt() {
         return serviceStartAt;
     }
 

@@ -1,5 +1,8 @@
-package com.hclc.mobilecs.flink;
+package com.hclc.mobilecs.flink.ingesting;
 
+import com.hclc.mobilecs.flink.importing.model.EnrichedIncomingDataRecord;
+import com.hclc.mobilecs.flink.ingesting.model.Agreement;
+import com.hclc.mobilecs.flink.ingesting.model.DataRecord;
 import org.apache.flink.api.common.state.ListState;
 import org.apache.flink.api.common.state.ListStateDescriptor;
 import org.apache.flink.configuration.Configuration;

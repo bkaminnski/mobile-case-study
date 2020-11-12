@@ -1,5 +1,7 @@
-package com.hclc.mobilecs.flink;
+package com.hclc.mobilecs.flink.importing;
 
+import com.hclc.mobilecs.flink.importing.model.EnrichedIncomingDataRecord;
+import com.hclc.mobilecs.flink.importing.model.IncomingDataRecord;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.io.FilePathFilter;
 import org.apache.flink.api.java.io.TextInputFormat;
