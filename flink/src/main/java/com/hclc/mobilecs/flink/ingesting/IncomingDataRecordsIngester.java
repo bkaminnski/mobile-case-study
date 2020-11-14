@@ -18,6 +18,8 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 
 import java.util.Properties;
 
+import static com.hclc.mobilecs.flink.Configuration.getCassandraContactPoint;
+import static com.hclc.mobilecs.flink.Configuration.getKafkaBootstrapServers;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.time.Duration.of;
 import static java.time.temporal.ChronoUnit.SECONDS;
@@ -25,7 +27,10 @@ import static org.apache.flink.streaming.api.TimeCharacteristic.EventTime;
 import static org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer.Semantic.EXACTLY_ONCE;
 
 public class IncomingDataRecordsIngester {
+    private static final String INCOMING_DATA_RECORDS_TOPIC = "incoming-data-records";
     private static final String DATA_RECORD_AGGREGATES_TOPIC = "data-records-aggregates";
+    private static final String KAFKA_CONSUMER_GROUP = "ingester";
+    private static final String AGREEMENTS_TOPIC = "agreements";
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     public static void main(String[] args) throws Exception {
@@ -37,7 +42,7 @@ public class IncomingDataRecordsIngester {
                 .keyBy(IncomingDataRecordsIngester::agreementIdInDataRecord);
 
         CassandraSink.addSink(dataRecordsStream)
-                .setHost("127.0.0.1")
+                .setHost(getCassandraContactPoint())
                 .build();
 
         dataRecordsStream
@@ -64,7 +69,7 @@ public class IncomingDataRecordsIngester {
 
     private static DataStreamSource<ObjectNode> readingAgreementsFromKafka(StreamExecutionEnvironment env) {
         FlinkKafkaConsumer<ObjectNode> agreementsKafkaConsumer = new FlinkKafkaConsumer<>(
-                "agreements",
+                AGREEMENTS_TOPIC,
                 new JSONKeyValueDeserializationSchema(true),
                 kafkaConsumerProperties()
         );
@@ -90,7 +95,7 @@ public class IncomingDataRecordsIngester {
 
     private static DataStreamSource<ObjectNode> readingIncomingDataRecordsFromKafka(StreamExecutionEnvironment env) {
         FlinkKafkaConsumer<ObjectNode> incomingDataRecordsKafkaConsumer = new FlinkKafkaConsumer<>(
-                "incoming-data-records",
+                INCOMING_DATA_RECORDS_TOPIC,
                 new JSONKeyValueDeserializationSchema(true),
                 kafkaConsumerProperties());
         incomingDataRecordsKafkaConsumer.assignTimestampsAndWatermarks(WatermarkStrategy.forMonotonousTimestamps());
@@ -107,8 +112,8 @@ public class IncomingDataRecordsIngester {
 
     private static Properties kafkaConsumerProperties() {
         Properties properties = new Properties();
-        properties.setProperty("bootstrap.servers", "localhost:9092");
-        properties.setProperty("group.id", "ingester");
+        properties.setProperty("bootstrap.servers", getKafkaBootstrapServers());
+        properties.setProperty("group.id", KAFKA_CONSUMER_GROUP);
         return properties;
     }
 
@@ -136,7 +141,7 @@ public class IncomingDataRecordsIngester {
 
     private static Properties kafkaProducerProperties() {
         Properties properties = new Properties();
-        properties.setProperty("bootstrap.servers", "localhost:9092");
+        properties.setProperty("bootstrap.servers", getKafkaBootstrapServers());
         return properties;
     }
 }

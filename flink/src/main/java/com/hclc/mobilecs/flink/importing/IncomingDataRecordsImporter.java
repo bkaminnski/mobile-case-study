@@ -15,6 +15,8 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import java.time.ZonedDateTime;
 import java.util.Properties;
 
+import static com.hclc.mobilecs.flink.Configuration.getKafkaBootstrapServers;
+import static com.hclc.mobilecs.flink.Configuration.getMobilecsIncomingDataRecordsDir;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.apache.flink.streaming.api.TimeCharacteristic.EventTime;
 import static org.apache.flink.streaming.api.functions.source.FileProcessingMode.PROCESS_CONTINUOUSLY;
@@ -44,7 +46,7 @@ public class IncomingDataRecordsImporter {
     }
 
     private static DataStreamSource<String> readingFilesContinuously(StreamExecutionEnvironment env) {
-        String pathString = "/tmp/incoming-data-records";
+        String pathString = getMobilecsIncomingDataRecordsDir();
         Path filePath = new Path(pathString);
         TextInputFormat textInputFormat = new TextInputFormat(filePath);
         textInputFormat.setFilesFilter(new FilePathFilter() {
@@ -92,7 +94,7 @@ public class IncomingDataRecordsImporter {
 
     private static Properties kafkaProducerProperties() {
         Properties properties = new Properties();
-        properties.setProperty("bootstrap.servers", "localhost:9092");
+        properties.setProperty("bootstrap.servers", getKafkaBootstrapServers());
         return properties;
     }
 }
