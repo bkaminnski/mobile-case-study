@@ -63,21 +63,22 @@ services:
       KAFKA_LOG_RETENTION_MS: -1
     networks:
     - network
-  
-  kafkacat:
-    container_name: kafkacat
-    image: confluentinc/cp-kafkacat
-    command: sleep infinity
-    networks:
-    - network
-  
+
   jobmanager:
     container_name: jobmanager
-    image: flink:1.11.2-scala_2.11
+    image: bkaminnski/flink-initializable:1.11.2-scala_2.11
+    volumes:
+      - "./flink/target:/mobilecs/flink-jobs"
     ports:
       - "8081:8081"
     command: jobmanager
     environment: 
+      INITIAL_JOBS: >
+        com.hclc.mobilecs.flink.importing.IncomingDataRecordsImporter;flink-0.0.1-SNAPSHOT.jar
+        com.hclc.mobilecs.flink.ingesting.IncomingDataRecordsIngester;flink-0.0.1-SNAPSHOT.jar
+      INITIAL_JOBS_DIR: /mobilecs/flink-jobs
+      INITIAL_JOBS_DELAY: 10
+      INITIAL_JOBS_PERIOD: 5
       FLINK_PROPERTIES: |
         jobmanager.rpc.address: jobmanager
       CASSANDRA_CONTACT_POINT: cassandra
