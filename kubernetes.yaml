@@ -1,86 +1,128 @@
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: v1
+kind: PersistentVolume
 metadata:
-  name: mobilecs-deployment
+  name: incoming-data-records-pv
+  labels:
+    type: local
 spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: mobilecs
-  strategy: {}
-  template:
-    metadata:
-      labels:
-        app: mobilecs
-    spec:
-      containers:
-      - name: mobilecs
-        image: bkaminnski/mobilecs:latest
-        imagePullPolicy: IfNotPresent
-        ports:
-        - containerPort: 8080
-        env:
-        - name: SPRING_DATA_CASSANDRA_CONTACT_POINTS
-          value: "cassandra-service"
-        - name: SPRING_DATA_CASSANDRA_PORT
-          value: "9042"
-        resources:
-          requests:
-            memory: "250Mi"
-            # cpu: "250m"
-          limits:
-            memory: "500Mi"
-            # cpu: "500m"
-        livenessProbe:
-          httpGet:
-            port: 8080
-            path: /actuator/health/liveness
-          initialDelaySeconds: 5
-          periodSeconds: 3
-          timeoutSeconds: 2
-          failureThreshold: 5
-        readinessProbe:
-          httpGet:
-            path: /actuator/health/readiness
-            port: 8080
-          initialDelaySeconds: 5
-          periodSeconds: 3
-          failureThreshold: 5
+  storageClassName: incoming-data-records-storage
+  accessModes:
+    - ReadWriteMany
+  capacity:
+    storage: 500Mi
+  hostPath:
+    path: "/mobilecs/incoming-data-records"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: incoming-data-records-pvc
+spec:
+  storageClassName: incoming-data-records-storage
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 250Mi
+      # cpu: "500m"
+    limits:
+      storage: 500Mi
+      # cpu: "1000m"
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: mobilecs-service
+  name: backend-service
 spec:
   ports:
-  - name: "8080"
-    port: 8080
-    targetPort: 8080
+    - name: "8080"
+      port: 8080
+      targetPort: 8080
   selector:
-    app: mobilecs
+    app: backend
   type: LoadBalancer
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  strategy: { }
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+        - name: backend
+          image: mobilecs-backend
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - name: incoming-data-records-volume
+              mountPath: /mobilecs/incoming-data-records
+          env:
+            - name: SPRING_DATA_CASSANDRA_CONTACT_POINTS
+              value: "cassandra-service"
+            - name: SPRING_DATA_CASSANDRA_PORT
+              value: "9042"
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              value: "kafka-service:29092"
+            - name: MOBILECS_INCOMING_DATA_RECORDS_DIR
+              value: "/mobilecs/incoming-data-records"
+          resources:
+            requests:
+              memory: "250Mi"
+              # cpu: "250m"
+            limits:
+              memory: "500Mi"
+              # cpu: "500m"
+          livenessProbe:
+            httpGet:
+              port: 8080
+              path: /actuator/health/liveness
+            initialDelaySeconds: 10
+            periodSeconds: 7
+            timeoutSeconds: 7
+            failureThreshold: 5
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 7
+            failureThreshold: 5
+      volumes:
+        - name: incoming-data-records-volume
+          persistentVolumeClaim:
+            claimName: incoming-data-records-pvc
 ---
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: cassandra-single-node-pv
+  name: cassandra-pv
   labels:
     type: local
 spec:
-  storageClassName: cassandra-single-node
+  storageClassName: cassandra-storage
   accessModes:
     - ReadWriteOnce
   capacity:
     storage: 500Mi
   hostPath:
-    path: "/data/cassandra-single-node/"
+    path: "/mobilecs/cassandra"
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: cassandra-single-node-pvc
+  name: cassandra-pvc
 spec:
-  storageClassName: cassandra-single-node
+  storageClassName: cassandra-storage
   accessModes:
     - ReadWriteOnce
   resources:
@@ -91,6 +133,18 @@ spec:
       storage: 500Mi
       # cpu: "1000m"
 ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cassandra-service
+spec:
+  ports:
+    - name: "9042"
+      port: 9042
+      targetPort: 9042
+  selector:
+    app: cassandra
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -100,46 +154,144 @@ spec:
   selector:
     matchLabels:
       app: cassandra
-  strategy: {}
+  strategy: { }
   template:
     metadata:
       labels:
         app: cassandra
     spec:
       containers:
-      - name: cassandra
-        image: cassandra:3.11.8
-        imagePullPolicy: IfNotPresent
-        ports:
-        - containerPort: 9042
-        volumeMounts:
-        - name: cassandra-volume
-          mountPath: /var/lib/cassandra
-        env:
-        - name: MAX_HEAP_SIZE
-          value: "500M"
-        - name: HEAP_NEWSIZE
-          value: "100M"
-        resources:
-          requests:
-            memory: "750Mi"
-            # cpu: "500m"
-          limits:
-            memory: "750Mi"
-            # cpu: "500m"
+        - name: cassandra
+          image: cassandra:3.11.8
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 9042
+          volumeMounts:
+            - name: cassandra-volume
+              mountPath: /var/lib/cassandra
+          env:
+            - name: MAX_HEAP_SIZE
+              value: "500M"
+            - name: HEAP_NEWSIZE
+              value: "100M"
+          resources:
+            requests:
+              memory: "750Mi"
+              # cpu: "500m"
+            limits:
+              memory: "750Mi"
+              # cpu: "500m"
       volumes:
-      - name: cassandra-volume
-        persistentVolumeClaim:
-          claimName: cassandra-single-node-pvc
+        - name: cassandra-volume
+          persistentVolumeClaim:
+            claimName: cassandra-pvc
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: cassandra-service
+  name: zookeeper-service
 spec:
   ports:
-  - name: "9042"
-    port: 9042
-    targetPort: 9042
+    - name: "2181"
+      port: 2181
+      targetPort: 2181
   selector:
-    app: cassandra
+    app: zookeeper
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zookeeper-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zookeeper
+  strategy: { }
+  template:
+    metadata:
+      labels:
+        app: zookeeper
+    spec:
+      containers:
+        - name: zookeeper
+          image: confluentinc/cp-zookeeper:5.4.3
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 2181
+          env:
+            - name: KAFKA_HEAP_OPTS
+              value: "-Xmx200M -Xms200M"
+            - name: ZOOKEEPER_CLIENT_PORT
+              value: "2181"
+            - name: ZOOKEEPER_TICK_TIME
+              value: "2000"
+          resources:
+            requests:
+              memory: "256Mi"
+              # cpu: "500m"
+            limits:
+              memory: "256Mi"
+              # cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka-service
+spec:
+  type: ClusterIP # headless service
+  clusterIP: None
+  ports:
+    - name: "29092"
+      port: 29092
+      targetPort: 29092
+  selector:
+    app: kafka
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafka-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kafka
+  strategy: { }
+  template:
+    metadata:
+      labels:
+        app: kafka
+    spec:
+      containers:
+        - name: kafka
+          image: confluentinc/cp-kafka:5.4.3
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 29092
+          env:
+            - name: KAFKA_HEAP_OPTS
+              value: "-Xmx400M -Xms400M"
+            - name: KAFKA_BROKER_ID
+              value: "0"
+            - name: KAFKA_ZOOKEEPER_CONNECT
+              value: "zookeeper-service:2181"
+            - name: KAFKA_LISTENERS
+              value: "INTERNAL://:29092"
+            - name: KAFKA_ADVERTISED_LISTENERS
+              value: "INTERNAL://kafka-service:29092"
+            - name: KAFKA_LISTENER_SECURITY_PROTOCOL_MAP
+              value: "INTERNAL:PLAINTEXT,LOCAL:PLAINTEXT"
+            - name: KAFKA_INTER_BROKER_LISTENER_NAME
+              value: "INTERNAL"
+            - name: KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR
+              value: "1"
+            - name: KAFKA_LOG_RETENTION_MS
+              value: "-1"
+          resources:
+            requests:
+              memory: "512Mi"
+              # cpu: "500m"
+            limits:
+              memory: "512Mi"
+              # cpu: "500m"
