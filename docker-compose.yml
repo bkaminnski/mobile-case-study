@@ -16,8 +16,8 @@ services:
     ports:
       - "8080:8080"
     environment:
-      SPRING_DATA_CASSANDRA_CONTACT_POINTS: cassandra
-      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      SPRING_DATA_CASSANDRA_CONTACT_POINTS: mobilecs-cassandra
+      KAFKA_BOOTSTRAP_SERVERS: mobilecs-kafka:29092
       MOBILECS_INCOMING_DATA_RECORDS_DIR: /mobilecs/incoming-data-records
     networks:
       - network
@@ -25,7 +25,7 @@ services:
       - cassandra
 
   cassandra:
-    container_name: cassandra
+    container_name: mobilecs-cassandra
     image: cassandra:3.11.8
     ports:
     - "9042:9042"
@@ -33,7 +33,7 @@ services:
     - network
 
   zookeeper:
-    container_name: zookeeper
+    container_name: mobilecs-zookeeper
     image: confluentinc/cp-zookeeper:5.4.3
     ports:
     - "2181:2181"
@@ -44,7 +44,7 @@ services:
     - network
 
   kafka:
-    container_name: kafka
+    container_name: mobilecs-kafka
     image: confluentinc/cp-kafka:5.4.3
     ports:
     - "9092:9092"
@@ -55,20 +55,21 @@ services:
     environment:
       KAFKA_BROKER_ID: 0
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_LISTENERS: INTERNAL://kafka:29092,LOCAL_DOCKER://kafka:9092
-      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:29092,LOCAL_DOCKER://localhost:9092
+      KAFKA_LISTENERS: INTERNAL://mobilecs-kafka:29092,LOCAL_DOCKER://mobilecs-kafka:9092
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://mobilecs-kafka:29092,LOCAL_DOCKER://localhost:9092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,LOCAL_DOCKER:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_LOG_RETENTION_MS: -1
     networks:
     - network
+    depends_on:
+      - zookeeper
 
   jobmanager:
-    container_name: jobmanager
-    image: bkaminnski/flink-initializable:1.11.2-scala_2.11
-    volumes:
-      - "./flink/target:/mobilecs/flink-jobs"
+    build: ./flink
+    container_name: mobilecs-jobmanager
+    image: mobilecs-flink
     ports:
       - "8081:8081"
     command: jobmanager
@@ -80,25 +81,25 @@ services:
       INITIAL_JOBS_DELAY: 10
       INITIAL_JOBS_PERIOD: 5
       FLINK_PROPERTIES: |
-        jobmanager.rpc.address: jobmanager
-      CASSANDRA_CONTACT_POINT: cassandra
-      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+        jobmanager.rpc.address: mobilecs-jobmanager
+      CASSANDRA_CONTACT_POINT: mobilecs-cassandra
+      KAFKA_BOOTSTRAP_SERVERS: mobilecs-kafka:29092
       MOBILECS_INCOMING_DATA_RECORDS_DIR: /mobilecs/incoming-data-records
     networks:
       - network
 
   taskmanager:
-    container_name: taskmanager
+    container_name: mobilecs-taskmanager
     image: flink:1.11.2-scala_2.11
     volumes:
       - incoming-data-records:/mobilecs/incoming-data-records
     command: taskmanager
     environment:
       FLINK_PROPERTIES: |
-        jobmanager.rpc.address: jobmanager
+        jobmanager.rpc.address: mobilecs-jobmanager
         taskmanager.numberOfTaskSlots: 2
-      CASSANDRA_CONTACT_POINT: cassandra
-      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      CASSANDRA_CONTACT_POINT: mobilecs-cassandra
+      KAFKA_BOOTSTRAP_SERVERS: mobilecs-kafka:29092
       MOBILECS_INCOMING_DATA_RECORDS_DIR: /mobilecs/incoming-data-records
     networks:
       - network
