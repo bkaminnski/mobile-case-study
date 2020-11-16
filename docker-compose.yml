@@ -80,6 +80,7 @@ services:
       INITIAL_JOBS_DIR: /mobilecs/flink-jobs
       INITIAL_JOBS_DELAY: 10
       INITIAL_JOBS_PERIOD: 5
+      INITIAL_JOBS_JOBMANAGER: localhost:8081
       FLINK_PROPERTIES: |
         jobmanager.rpc.address: mobilecs-jobmanager
       CASSANDRA_CONTACT_POINT: mobilecs-cassandra

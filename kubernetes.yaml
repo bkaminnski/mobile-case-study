@@ -239,8 +239,8 @@ kind: Service
 metadata:
   name: kafka-service
 spec:
-  type: ClusterIP # headless service
-  clusterIP: None
+  type: ClusterIP
+  clusterIP: None # headless service
   ports:
     - name: "29092"
       port: 29092
@@ -295,3 +295,165 @@ spec:
             limits:
               memory: "512Mi"
               # cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: jobmanager-service
+spec:
+  type: ClusterIP
+  ports:
+    - name: rpc
+      port: 6123
+    - name: blob-server
+      port: 6124
+    - name: webui
+      port: 8081
+  selector:
+    app: jobmanager
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: jobmanager-rest-service
+spec:
+  type: NodePort
+  ports:
+    - name: rest
+      port: 8081
+      targetPort: 8081
+      nodePort: 30081
+  selector:
+    app: jobmanager
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jobmanager-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jobmanager
+  template:
+    metadata:
+      labels:
+        app: jobmanager
+    spec:
+      containers:
+        - name: jobmanager
+          image: mobilecs-flink
+          imagePullPolicy: IfNotPresent
+          args: ["jobmanager"]
+          ports:
+            - containerPort: 6123
+              name: rpc
+            - containerPort: 6124
+              name: blob-server
+            - containerPort: 8081
+              name: webui
+          env:
+            - name: INITIAL_JOBS
+              value: >
+                com.hclc.mobilecs.flink.importing.IncomingDataRecordsImporter;flink-0.0.1-SNAPSHOT.jar
+                com.hclc.mobilecs.flink.ingesting.IncomingDataRecordsIngester;flink-0.0.1-SNAPSHOT.jar
+            - name: INITIAL_JOBS_DIR
+              value: "/mobilecs/flink-jobs"
+            - name: INITIAL_JOBS_DELAY
+              value: "10"
+            - name: INITIAL_JOBS_PERIOD
+              value: "5"
+            - name: INITIAL_JOBS_JOBMANAGER
+              value: "localhost:8081"
+            - name: FLINK_PROPERTIES
+              value: |
+                jobmanager.rpc.address: jobmanager-service
+                jobmanager.rpc.port: 6123
+                jobmanager.memory.process.size: 1600m
+                taskmanager.rpc.port: 6122
+            - name: CASSANDRA_CONTACT_POINT
+              value: "cassandra-service"
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              value: "kafka-service:29092"
+            - name: MOBILECS_INCOMING_DATA_RECORDS_DIR
+              value: "/mobilecs/incoming-data-records"
+          resources:
+            requests:
+              memory: "1600Mi"
+              # cpu: "500m"
+            limits:
+              memory: "1600Mi"
+              # cpu: "500m"
+          livenessProbe:
+            tcpSocket:
+              port: 6123
+            initialDelaySeconds: 30
+            periodSeconds: 60
+          volumeMounts:
+            - name: incoming-data-records-volume
+              mountPath: /mobilecs/incoming-data-records
+          securityContext:
+            runAsUser: 9999  # refers to user _flink_ from official flink image, change if necessary
+      volumes:
+        - name: incoming-data-records-volume
+          persistentVolumeClaim:
+            claimName: incoming-data-records-pvc
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: taskmanager-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: taskmanager
+  strategy: { }
+  template:
+    metadata:
+      labels:
+        app: taskmanager
+    spec:
+      containers:
+        - name: taskmanager
+          image: mobilecs-flink
+          imagePullPolicy: IfNotPresent
+          args: ["taskmanager"]
+          ports:
+            - containerPort: 6122
+              name: rpc
+            - containerPort: 6125
+              name: query-state
+          env:
+            - name: FLINK_PROPERTIES
+              value: |
+                jobmanager.rpc.address: jobmanager-service
+                jobmanager.rpc.port: 6123
+                taskmanager.rpc.port: 6122
+                taskmanager.numberOfTaskSlots: 2
+                taskmanager.memory.process.size: 1728m
+            - name: CASSANDRA_CONTACT_POINT
+              value: "cassandra-service"
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              value: "kafka-service:29092"
+            - name: MOBILECS_INCOMING_DATA_RECORDS_DIR
+              value: "/mobilecs/incoming-data-records"
+          livenessProbe:
+            tcpSocket:
+              port: 6122
+            initialDelaySeconds: 30
+            periodSeconds: 60
+          volumeMounts:
+            - name: incoming-data-records-volume
+              mountPath: /mobilecs/incoming-data-records
+          resources:
+            requests:
+              memory: "1728Mi"
+              # cpu: "500m"
+            limits:
+              memory: "1728Mi"
+              # cpu: "500m"
+      volumes:
+        - name: incoming-data-records-volume
+          persistentVolumeClaim:
+            claimName: incoming-data-records-pvc

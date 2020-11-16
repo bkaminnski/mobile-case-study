@@ -41,7 +41,7 @@
 1. Useful kubernetes commands (read about stern [here](https://github.com/burrsutter/9stepsawesome/blob/3ddeead8b5cd5841760f2a4beb90eeae35a8a4b1/3_logs.adoc))
 
         minikube dashboard
-        kubectl get pods --show-labels -w
-        watch -n 0.1 kubectl get pods --show-labels
+        kubectl get pods --show-labels -w -o wide
+        watch -n 0.1 kubectl get pods --show-labels -o wide
         stern backend
 
