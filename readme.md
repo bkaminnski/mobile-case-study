@@ -6,6 +6,8 @@ The source data for the project are data record files (tracking data used by mob
 
 # Architecture
 
+![Architecture Diagram](architecture_diagram.jpg)
+
 The project uses Flink to import the files into the system, and as a streaming platform for detecting the moment of exceeding the data plan. 
 
 An auxiliary Spring backend project helps in generating test data:
@@ -18,7 +20,7 @@ There are two main processes in the Case Study.
 
 ## *Importing data records* process
 
-- Implemented by :3: *Incoming Data Records Importer* Flink job
+- Implemented by :three: *Incoming Data Records Importer* Flink job
 - Reads raw data record files received from MNO (from `/mobilecs/incoming-data-records` folder)
 - Enriches them with an identifier that allows to uniquely identify any record globally in the system (regardless of identification provided by MNO)
 - Publishes them to :four: *incoming-data-records* Kafka topic
@@ -34,8 +36,6 @@ There are two main processes in the Case Study.
 - Aggregates data records within the window and publishes appropriate message to :eight: *data-records-aggregates* topic twice in the window lifetime:
   - as soon as the data used in the period exceeds the data plan (DATA_PLAN_EXCEEDED) 
   - at the end of the billing period (BILLING_PERIOD_CLOSED) 
-
-![Architecture Diagram](architecture_diagram.jpg)
 
 # Running the project
 
