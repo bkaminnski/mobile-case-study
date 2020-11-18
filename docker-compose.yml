@@ -91,7 +91,7 @@ services:
 
   taskmanager:
     container_name: mobilecs-taskmanager
-    image: flink:1.11.2-scala_2.11
+    image: flink:1.11.2-scala_2.11-java11
     volumes:
       - incoming-data-records:/mobilecs/incoming-data-records
     command: taskmanager

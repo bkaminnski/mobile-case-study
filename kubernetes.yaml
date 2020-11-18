@@ -290,10 +290,10 @@ spec:
               value: "-1"
           resources:
             requests:
-              memory: "512Mi"
+              memory: "1024Mi"
               # cpu: "500m"
             limits:
-              memory: "512Mi"
+              memory: "1024Mi"
               # cpu: "500m"
 ---
 apiVersion: v1
@@ -416,7 +416,7 @@ spec:
     spec:
       containers:
         - name: taskmanager
-          image: mobilecs-flink
+          image: flink:1.11.2-scala_2.11-java11
           imagePullPolicy: IfNotPresent
           args: ["taskmanager"]
           ports:

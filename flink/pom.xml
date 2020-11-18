@@ -11,7 +11,7 @@
     <properties>
         <flink.version>1.11.2</flink.version>
         <scala.binary.version>2.11</scala.binary.version>
-        <java.version>8</java.version>
+        <java.version>11</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
