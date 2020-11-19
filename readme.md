@@ -1,6 +1,6 @@
 # Project Description
 
-This Case Study draws from the mobile network operators (MNO) domain. The goal of the project is to implement ongoing, live tracking of data usage by mobile subscribers. As soon as data used within a billing period exceeds max data usage defined in the data plan - the system should generate appropriate notification. In this case study, we expect that appropriate messages are published to *data-records-aggregates* Kafka topic. Later these messages could be used for different purposes, like to inform the subscriber they exceeded the data plan or to lower the data speed for the data used outside of the plan. 
+This Case Study draws from the mobile network operators (MNO) domain. The goal of the project is to implement ongoing, live tracking of data usage by mobile subscribers. As soon as data used within a billing period exceeds max data usage defined in the data plan - the system should generate appropriate notification. In this case study, we expect that appropriate messages are published to *data-records-aggregates* Kafka topic. Later these messages could be used for different purposes, like to inform the subscriber they exceeded the data plan or to lower the data transfer speed for the data used outside of the plan. 
 
 The source data for the project are data record files (tracking data used by mobile phone users) and subscribers' agreements defined by MNO. 
 
@@ -30,9 +30,9 @@ There are two main processes in the Case Study.
 - Implemented by :five: *Incoming Data Records Ingester* Flink job
 - Reads imported data records from the *incoming-data-records* Kafka topic
 - Reads subscribers' agreements from the *agreements* Kafka topic
-- Matches incoming data records with agreements, creating *ingested* data records, from now on referred to as simply *data records*
+- Matches incoming data records with agreements (using Flink RichCoFlatMapFunction), creating *ingested* data records, from now on referred to as simply *data records*
 - Stores resulting data records in :six: Cassandra database, in *mobilecs.data_record* table
-- Defines :seven: tumbling window that corresponds to the billing period
+- Defines :seven: a tumbling window that corresponds to the billing period (with a custom assigner, a custom trigger, and a process window function)
 - Aggregates data records within the window and publishes appropriate message to :eight: *data-records-aggregates* topic twice in the window lifetime:
   - as soon as the data used in the period exceeds the data plan (DATA_PLAN_EXCEEDED) 
   - at the end of the billing period (BILLING_PERIOD_CLOSED) 
