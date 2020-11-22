@@ -326,6 +326,22 @@ spec:
   selector:
     app: jobmanager
 ---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: flink-config
+data:
+  FLINK_PROPERTIES: |
+    jobmanager.rpc.address: jobmanager-service
+    jobmanager.rpc.port: 6123
+    jobmanager.memory.process.size: 1600m
+    taskmanager.rpc.port: 6122
+    taskmanager.numberOfTaskSlots: 2
+    taskmanager.memory.process.size: 1728m
+  CASSANDRA_CONTACT_POINT: "cassandra-service"
+  KAFKA_BOOTSTRAP_SERVERS: "kafka-service:29092"
+  MOBILECS_INCOMING_DATA_RECORDS_DIR: "/mobilecs/incoming-data-records"
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -365,18 +381,9 @@ spec:
               value: "5"
             - name: INITIAL_JOBS_JOBMANAGER
               value: "localhost:8081"
-            - name: FLINK_PROPERTIES
-              value: |
-                jobmanager.rpc.address: jobmanager-service
-                jobmanager.rpc.port: 6123
-                jobmanager.memory.process.size: 1600m
-                taskmanager.rpc.port: 6122
-            - name: CASSANDRA_CONTACT_POINT
-              value: "cassandra-service"
-            - name: KAFKA_BOOTSTRAP_SERVERS
-              value: "kafka-service:29092"
-            - name: MOBILECS_INCOMING_DATA_RECORDS_DIR
-              value: "/mobilecs/incoming-data-records"
+          envFrom:
+            - configMapRef:
+                name: flink-config
           resources:
             requests:
               memory: "1600Mi"
@@ -424,20 +431,9 @@ spec:
               name: rpc
             - containerPort: 6125
               name: query-state
-          env:
-            - name: FLINK_PROPERTIES
-              value: |
-                jobmanager.rpc.address: jobmanager-service
-                jobmanager.rpc.port: 6123
-                taskmanager.rpc.port: 6122
-                taskmanager.numberOfTaskSlots: 2
-                taskmanager.memory.process.size: 1728m
-            - name: CASSANDRA_CONTACT_POINT
-              value: "cassandra-service"
-            - name: KAFKA_BOOTSTRAP_SERVERS
-              value: "kafka-service:29092"
-            - name: MOBILECS_INCOMING_DATA_RECORDS_DIR
-              value: "/mobilecs/incoming-data-records"
+          envFrom:
+            - configMapRef:
+                name: flink-config
           livenessProbe:
             tcpSocket:
               port: 6122
