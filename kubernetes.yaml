@@ -11,7 +11,7 @@ spec:
   capacity:
     storage: 500Mi
   hostPath:
-    path: "/mobilecs/incoming-data-records"
+    path: "/data/mobilecs/incoming-data-records"
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
