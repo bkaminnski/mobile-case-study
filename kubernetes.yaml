@@ -383,15 +383,15 @@ spec:
               name: webui
           env:
             - name: INITIAL_JOBS
-              value: >
-                com.hclc.mobilecs.flink.importing.IncomingDataRecordsImporter;flink-0.0.1-SNAPSHOT.jar
-                com.hclc.mobilecs.flink.ingesting.IncomingDataRecordsIngester;flink-0.0.1-SNAPSHOT.jar
+              value: |
+                com.hclc.mobilecs.flink.importing.IncomingDataRecordsImporter;flink-0.0.1-SNAPSHOT.jar;Incoming Data Records Importer (RUNNING)
+                com.hclc.mobilecs.flink.ingesting.IncomingDataRecordsIngester;flink-0.0.1-SNAPSHOT.jar;Incoming Data Records Ingester (RUNNING)
             - name: INITIAL_JOBS_DIR
               value: "/mobilecs/flink-jobs"
             - name: INITIAL_JOBS_DELAY
               value: "20"
             - name: INITIAL_JOBS_PERIOD
-              value: "5"
+              value: "20"
             - name: INITIAL_JOBS_JOBMANAGER
               value: "localhost:8081"
           envFrom:
