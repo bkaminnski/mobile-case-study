@@ -1,2 +1,2 @@
 #!/bin/bash
-eval $(minikube -p minikube docker-env)
+eval $(minikube -p mobilecs docker-env)

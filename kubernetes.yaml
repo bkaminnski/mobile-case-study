@@ -103,41 +103,11 @@ spec:
             claimName: incoming-data-records-pvc
 ---
 apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: cassandra-pv
-  labels:
-    type: local
-spec:
-  storageClassName: cassandra-storage
-  accessModes:
-    - ReadWriteOnce
-  capacity:
-    storage: 500Mi
-  hostPath:
-    path: "/mobilecs/cassandra"
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: cassandra-pvc
-spec:
-  storageClassName: cassandra-storage
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 250Mi
-      # cpu: "500m"
-    limits:
-      storage: 500Mi
-      # cpu: "1000m"
----
-apiVersion: v1
 kind: Service
 metadata:
   name: cassandra-service
 spec:
+  clusterIP: None
   ports:
     - name: "9042"
       port: 9042
@@ -146,20 +116,23 @@ spec:
     app: cassandra
 ---
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
-  name: cassandra-deployment
+  name: cassandra-statefulset
+  labels:
+    app: cassandra
 spec:
+  serviceName: cassandra
   replicas: 1
   selector:
     matchLabels:
       app: cassandra
-  strategy: { }
   template:
     metadata:
       labels:
         app: cassandra
     spec:
+      terminationGracePeriodSeconds: 1800
       containers:
         - name: cassandra
           image: cassandra:3.11.8
@@ -167,7 +140,7 @@ spec:
           ports:
             - containerPort: 9042
           volumeMounts:
-            - name: cassandra-volume
+            - name: cassandra-data
               mountPath: /var/lib/cassandra
           env:
             - name: MAX_HEAP_SIZE
@@ -181,16 +154,22 @@ spec:
             limits:
               memory: "750Mi"
               # cpu: "500m"
-      volumes:
-        - name: cassandra-volume
-          persistentVolumeClaim:
-            claimName: cassandra-pvc
+  volumeClaimTemplates:
+    - metadata:
+        name: cassandra-data
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        storageClassName: standard
+        resources:
+          requests:
+            storage: 500Mi
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: zookeeper-service
 spec:
+  clusterIP: None
   ports:
     - name: "2181"
       port: 2181
@@ -199,15 +178,15 @@ spec:
     app: zookeeper
 ---
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
-  name: zookeeper-deployment
+  name: zookeeper-statefulset
 spec:
+  serviceName: zookeeper
   replicas: 1
   selector:
     matchLabels:
       app: zookeeper
-  strategy: { }
   template:
     metadata:
       labels:
@@ -219,6 +198,11 @@ spec:
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 2181
+          volumeMounts:
+            - name: zookeeper-data
+              mountPath: /var/lib/zookeeper/data
+            - name: zookeeper-log
+              mountPath: /var/lib/zookeeper/log
           env:
             - name: KAFKA_HEAP_OPTS
               value: "-Xmx200M -Xms200M"
@@ -233,6 +217,23 @@ spec:
             limits:
               memory: "256Mi"
               # cpu: "500m"
+  volumeClaimTemplates:
+    - metadata:
+        name: zookeeper-data
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        storageClassName: standard
+        resources:
+          requests:
+            storage: 500Mi
+    - metadata:
+        name: zookeeper-log
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        storageClassName: standard
+        resources:
+          requests:
+            storage: 500Mi
 ---
 apiVersion: v1
 kind: Service
@@ -249,15 +250,15 @@ spec:
     app: kafka
 ---
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
-  name: kafka-deployment
+  name: kafka-statefulset
 spec:
+  serviceName: kafka
   replicas: 1
   selector:
     matchLabels:
       app: kafka
-  strategy: { }
   template:
     metadata:
       labels:
@@ -269,6 +270,9 @@ spec:
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 29092
+          volumeMounts:
+            - name: kafka-data
+              mountPath: /var/lib/kafka/data
           env:
             - name: KAFKA_HEAP_OPTS
               value: "-Xmx400M -Xms400M"
@@ -295,6 +299,15 @@ spec:
             limits:
               memory: "1024Mi"
               # cpu: "500m"
+  volumeClaimTemplates:
+    - metadata:
+        name: kafka-data
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        storageClassName: standard
+        resources:
+          requests:
+            storage: 500Mi
 ---
 apiVersion: v1
 kind: Service
@@ -360,7 +373,7 @@ spec:
         - name: jobmanager
           image: mobilecs-flink
           imagePullPolicy: IfNotPresent
-          args: ["jobmanager"]
+          args: [ "jobmanager" ]
           ports:
             - containerPort: 6123
               name: rpc
@@ -376,7 +389,7 @@ spec:
             - name: INITIAL_JOBS_DIR
               value: "/mobilecs/flink-jobs"
             - name: INITIAL_JOBS_DELAY
-              value: "10"
+              value: "20"
             - name: INITIAL_JOBS_PERIOD
               value: "5"
             - name: INITIAL_JOBS_JOBMANAGER
@@ -425,7 +438,7 @@ spec:
         - name: taskmanager
           image: flink:1.11.2-scala_2.11-java11
           imagePullPolicy: IfNotPresent
-          args: ["taskmanager"]
+          args: [ "taskmanager" ]
           ports:
             - containerPort: 6122
               name: rpc

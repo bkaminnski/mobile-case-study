@@ -132,7 +132,7 @@ The project can be executed both in docker-compose and kubernetes. Docker compos
 
 1. Install and start minikube, https://minikube.sigs.k8s.io/docs/start/, e.g.:
 
-        minikube start --driver=hyperkit --cpus=3 --memory=8g
+        minikube start --profile mobilecs --driver=hyperkit --cpus=3 --memory=8g
 
 1. Build maven projects and deploy docker images
 
@@ -146,21 +146,19 @@ The project can be executed both in docker-compose and kubernetes. Docker compos
 
 1. Run `kubectl get pods`, the output should look like below: 6 pods in *READY* status 1/1.
 
-        NAME                                      READY   STATUS    RESTARTS   AGE    LABELS
-        backend-deployment-6bb6846cbd-5rhns       1/1     Running   6          4m8s   app=backend,pod-template-hash=6bb6846cbd
-        cassandra-deployment-b6ff764dc-qskt9      1/1     Running   0          4m8s   app=cassandra,pod-template-hash=b6ff764dc
-        jobmanager-deployment-5c88484cd8-z2xmz    1/1     Running   0          4m7s   app=jobmanager,pod-template-hash=5c88484cd8
-        kafka-deployment-598c8fb974-tckr5         1/1     Running   0          4m7s   app=kafka,pod-template-hash=598c8fb974
-        taskmanager-deployment-8479dd5b48-pcn26   1/1     Running   0          4m7s   app=taskmanager,pod-template-hash=8479dd5b48
-        zookeeper-deployment-6875df84c7-45qw4     1/1     Running   0          4m8s   app=zookeeper,pod-template-hash=6875df84c7
+        NAME                                     READY   STATUS    RESTARTS   AGE
+        backend-deployment-6bb6846cbd-77fgv      1/1     Running   5          9m47s
+        cassandra-statefulset-0                  1/1     Running   0          9m47s
+        jobmanager-deployment-69f64fcf6b-v45dk   1/1     Running   0          9m46s
+        kafka-statefulset-0                      1/1     Running   0          9m46s
+        taskmanager-deployment-677b6f454-92p9f   1/1     Running   0          9m46s
+        zookeeper-statefulset-0                  1/1     Running   0          9m46s
     
-1. Open Flink Dashboard (e.g. http://192.168.64.5:30081/#/job/running) and make sure both jobs are running: *Incoming Data Records Importer* and *Incoming Data Records Ingester*
+1. Open Flink Dashboard (e.g. http://192.168.64.11:30081/#/job/running) and make sure both jobs are running: *Incoming Data Records Importer* and *Incoming Data Records Ingester*
 
-    :information_source: Run `minikube service jobmanager-rest-service --url` to check URL of Flink Dashboard and replace in the address above.
+    :information_source: Run `minikube -p mobilecs service jobmanager-rest-service --url` to check URL of Flink Dashboard and replace in the address above.
 
-1. In case of restarting the project and running it again from scratch make sure to also clean the volume in which incoming data files are generated.
-    - Run `kubectl exec -it `kubectl get pods -l app=backend -o name` -- bash`
-    - Delete all the files in `/mobilecs/incoming-data-records`
+1. In case of restarting the project and running it again from scratch make sure to also clean all persistent volumes.
    
 1. Start Kafka consumer for expected data records aggregated in Flink
 
@@ -168,8 +166,8 @@ The project can be executed both in docker-compose and kubernetes. Docker compos
 
 1. Generate test CDR Data Records and agreements
 
-        curl `minikube service backend-service --url`/api/agreements/generate
-        curl `minikube service backend-service --url`/api/incoming-data-records/generate
+        curl `minikube -p mobilecs service backend-service --url`/api/agreements/generate
+        curl `minikube -p mobilecs service backend-service --url`/api/incoming-data-records/generate
 
 1. Go back to the console in which Kafka consumer is running for *data-records-aggregates* topic. Check results, it should look like below. When it shows - it means that this Case Study project finished successfully.
 
@@ -208,11 +206,21 @@ The project can be executed both in docker-compose and kubernetes. Docker compos
     - Open bash for backend service
     
             kubectl exec -it `kubectl get pods -l app=backend -o name` -- bash
+            
+    - Open bash for cassandra service
+    
+            kubectl exec -it `kubectl get pods -l app=cassandra -o name` -- bash
         
-1. Useful kubernetes commands (read about stern [here](https://github.com/burrsutter/9stepsawesome/blob/3ddeead8b5cd5841760f2a4beb90eeae35a8a4b1/3_logs.adoc))
+1. Useful kubernetes commands
+    - Read about stern [here](https://github.com/burrsutter/9stepsawesome/blob/3ddeead8b5cd5841760f2a4beb90eeae35a8a4b1/3_logs.adoc))
+    - Install jq with `brew install jq`
 
-        minikube dashboard
-        kubectl get pods --show-labels -w -o wide
-        watch -n 0.1 kubectl get pods --show-labels -o wide
-        stern backend
+            minikube dashboard
+            minikube profile list
+            minikube profile list -o json | jq .
+            minikube stop -p mobilecs
+            minikube delete -p mobilecs
+            kubectl get pods --show-labels -w -o wide
+            watch -n 0.1 kubectl get pods --show-labels -o wide
+            stern backend
 
