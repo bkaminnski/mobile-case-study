@@ -351,15 +351,18 @@ data:
     taskmanager.rpc.port: 6122
     taskmanager.numberOfTaskSlots: 2
     taskmanager.memory.process.size: 1728m
+    state.backend: rocksdb
+    state.checkpoints.dir: file:///mobilecs/flink-data
   CASSANDRA_CONTACT_POINT: "cassandra-service"
   KAFKA_BOOTSTRAP_SERVERS: "kafka-service:29092"
   MOBILECS_INCOMING_DATA_RECORDS_DIR: "/mobilecs/incoming-data-records"
 ---
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
-  name: jobmanager-deployment
+  name: jobmanager-statefulset
 spec:
+  serviceName: jobmanager
   replicas: 1
   selector:
     matchLabels:
@@ -410,25 +413,30 @@ spec:
             initialDelaySeconds: 30
             periodSeconds: 60
           volumeMounts:
-            - name: incoming-data-records-volume
-              mountPath: /mobilecs/incoming-data-records
+            - name: flink-data
+              mountPath: /mobilecs/flink-data
           securityContext:
             runAsUser: 9999  # refers to user _flink_ from official flink image, change if necessary
-      volumes:
-        - name: incoming-data-records-volume
-          persistentVolumeClaim:
-            claimName: incoming-data-records-pvc
+  volumeClaimTemplates:
+    - metadata:
+        name: flink-data
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        storageClassName: standard
+        resources:
+          requests:
+            storage: 500Mi
 ---
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
-  name: taskmanager-deployment
+  name: taskmanager-statefulset
 spec:
+  serviceName: taskmanager
   replicas: 1
   selector:
     matchLabels:
       app: taskmanager
-  strategy: { }
   template:
     metadata:
       labels:
@@ -455,6 +463,8 @@ spec:
           volumeMounts:
             - name: incoming-data-records-volume
               mountPath: /mobilecs/incoming-data-records
+            - name: flink-data
+              mountPath: /mobilecs/flink-data
           resources:
             requests:
               memory: "1728Mi"
@@ -466,3 +476,12 @@ spec:
         - name: incoming-data-records-volume
           persistentVolumeClaim:
             claimName: incoming-data-records-pvc
+  volumeClaimTemplates:
+    - metadata:
+        name: flink-data
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        storageClassName: standard
+        resources:
+          requests:
+            storage: 500Mi
