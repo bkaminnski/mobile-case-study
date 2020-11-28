@@ -228,7 +228,7 @@ The project can be executed both in docker-compose and kubernetes. Docker compos
 
 One of the results of running the complete case study as described above, is that incoming data records matched with agreements are stored in Cassandra database, in *mobilecs.data_record* table. Instead of running a complete case study, one can directly generate data records using a dedicated generator.
 
-## Directly generating `data-records`
+## Directly generating *data records*
 
 1. Start only cassandra database via docker compose
 
@@ -250,3 +250,15 @@ One of the results of running the complete case study as described above, is tha
         select * from data_record where agreement_id = 0b12c601-9287-3f5c-a78c-df508fe0f889 and year = 2020 and month = 01;
         select * from data_record where agreement_id = 0b12c601-9287-3f5c-a78c-df508fe0f889 and year = 2020 and month = 02;
         truncate data_record;
+
+6. Getting data_records via REST API
+
+        curl http://localhost:8080/api/data-records/0b12c601-9287-3f5c-a78c-df508fe0f889/2020/01 | jq .
+        curl http://localhost:8080/api/data-records/0b12c601-9287-3f5c-a78c-df508fe0f889/2020/02 | jq .
+
+7. Getting data records in React app (work in progress)
+
+        cd frontend
+        yarn start
+        
+    and navigate to http://localhost:3000
