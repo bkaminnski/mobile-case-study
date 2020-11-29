@@ -12,6 +12,7 @@ public class AgreementsGenerator {
     public static final ZonedDateTime SERVICE_START_AT = ZonedDateTime.parse("2020-01-01T00:00:00+01:00[Europe/Warsaw]");
     public static final long AGREEMENT_ID_SEED = 31423434;
     public static final long MSISDN_SEED = 84744291;
+    public static final String BILLING_PERIOD_TIME_ZONE = "Europe/Warsaw";
     private static final long SIGNED_AT_SEED = 55701923;
     private static final long PLAN_SEED = 73244573;
     private static final List<Long> MAX_BYTES_PLANS = List.of(
@@ -40,7 +41,7 @@ public class AgreementsGenerator {
                 MsisdnValueGenerator.nextMsisdnValue(msisdnRandom),
                 signedAt(),
                 SERVICE_START_AT,
-                "Europe/Warsaw",
+                BILLING_PERIOD_TIME_ZONE,
                 randomMaxBytesInBillingPeriod()
         );
     }

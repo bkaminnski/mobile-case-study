@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
+import static com.hclc.mobilecs.backend.agreements.AgreementsGenerator.BILLING_PERIOD_TIME_ZONE;
 import static java.lang.Integer.parseInt;
 import static java.util.stream.Collectors.toCollection;
 
@@ -45,7 +46,7 @@ class AgreementsGeneratorService {
                 "48000000000",
                 ZonedDateTime.parse("2999-01-01T00:00:00+01:00[Europe/Warsaw]"),
                 ZonedDateTime.parse("2999-01-01T00:00:00+01:00[Europe/Warsaw]"),
-                "Europe/Warsaw",
+                BILLING_PERIOD_TIME_ZONE,
                 0
         );
     }

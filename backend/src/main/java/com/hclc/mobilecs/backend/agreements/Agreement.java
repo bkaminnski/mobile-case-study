@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
-class Agreement {
+public class Agreement {
     private final UUID id;
     private final String msisdn;
     private final ZonedDateTime signedAt;
@@ -15,7 +15,7 @@ class Agreement {
     private final String billingPeriodTimeZone;
     private final long maxBytesInBillingPeriod;
 
-    Agreement(UUID id, String msisdn, ZonedDateTime signedAt, ZonedDateTime serviceStartAt, String billingPeriodTimeZone, long maxBytesInBillingPeriod) {
+    public Agreement(UUID id, String msisdn, ZonedDateTime signedAt, ZonedDateTime serviceStartAt, String billingPeriodTimeZone, long maxBytesInBillingPeriod) {
         this.id = id;
         this.msisdn = msisdn;
         this.signedAt = signedAt;
@@ -24,7 +24,7 @@ class Agreement {
         this.maxBytesInBillingPeriod = maxBytesInBillingPeriod;
     }
 
-    UUID getId() {
+    public UUID getId() {
         return id;
     }
 
@@ -34,6 +34,10 @@ class Agreement {
 
     ZonedDateTime getSignedAt() {
         return signedAt;
+    }
+
+    public String getBillingPeriodTimeZone() {
+        return billingPeriodTimeZone;
     }
 
     String toJson(ObjectMapper objectMapper) {

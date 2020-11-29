@@ -1,5 +1,6 @@
 package com.hclc.mobilecs.backend.datarecords;
 
+import com.hclc.mobilecs.backend.agreements.Agreement;
 import org.springframework.data.cassandra.core.cql.CqlTemplate;
 import org.springframework.web.bind.annotation.*;
 
@@ -7,6 +8,8 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
 import java.util.UUID;
+
+import static com.hclc.mobilecs.backend.agreements.AgreementsGenerator.BILLING_PERIOD_TIME_ZONE;
 
 @RestController
 @RequestMapping("api/data-records")
@@ -24,6 +27,14 @@ class DataRecordsController {
     @CrossOrigin(origins = "http://localhost:3000")
     List<DataRecord> find(@PathVariable String agreementId, @PathVariable short year, @PathVariable byte month) {
         return dataRecordRepository.findAllByKeyAgreementIdAndKeyYearAndKeyMonth(UUID.fromString(agreementId), year, month);
+    }
+
+    @PutMapping("/{agreementId}")
+    @CrossOrigin(origins = "http://localhost:3000")
+    void upsert(@PathVariable String agreementId, @RequestBody DataRecordUpsertRequest upsertRequest) {
+        Agreement agreement = new Agreement(UUID.fromString(agreementId), null, null, null, BILLING_PERIOD_TIME_ZONE, 0); // only for case study; get from agreements repository otherwise
+        DataRecord dataRecord = DataRecord.from(agreement, upsertRequest);
+        dataRecordRepository.save(dataRecord);
     }
 
     @GetMapping("/{agreementId}/{year}/{month}/total-data-used")
