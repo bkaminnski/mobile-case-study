@@ -1,0 +1,32 @@
+schema {
+    query: Query
+    mutation: Mutation
+}
+
+type Query {
+  findDataRecords(agreementId: ID!, year: Int!, month: Int!): [DataRecord]!
+  getTotalDataUsage(agreementId: ID!, year: Int!, month: Int!): String!
+}
+
+type Mutation {
+  upsertDataRecord(agreementId: String!, upsertRequest: DataRecordUpsertRequest!): DataRecord!
+}
+
+type DataRecord {
+    key: DataRecordKey!
+    recordedBytes: Int!
+}
+
+type DataRecordKey {
+    agreementId: ID!
+    year: Int!
+    month: Int!
+    recordedAt: String!
+    internalRecordId: ID!
+}
+
+input DataRecordUpsertRequest {
+    recordedAt: String!
+    internalRecordId: ID!
+    recordedBytes: Int!
+}

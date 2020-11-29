@@ -251,7 +251,7 @@ One of the results of running the complete case study as described above, is tha
         select * from data_record where agreement_id = 0b12c601-9287-3f5c-a78c-df508fe0f889 and year = 2020 and month = 02;
         truncate data_record;
 
-6. Getting and upserting data_records via REST API
+6. Getting and upserting *data records* via REST API
 
         curl http://localhost:8080/api/data-records/0b12c601-9287-3f5c-a78c-df508fe0f889/2020/01 | jq .
         curl http://localhost:8080/api/data-records/0b12c601-9287-3f5c-a78c-df508fe0f889/2020/02 | jq .
@@ -263,3 +263,49 @@ One of the results of running the complete case study as described above, is tha
         yarn start
         
     and navigate to http://localhost:3000
+    
+8. Getting and upserting *data records* via GraphQL (http://localhost:8080/graphql and http://localhost:8080/graphiql)
+    - Finding data records, click [here](http://localhost:8080/graphiql?query=%7B%0A%20%20findDataRecords(agreementId%3A%20%220b12c601-9287-3f5c-a78c-df508fe0f889%22%2C%20year%3A%202020%2C%20month%3A%201)%20%7B%0A%20%20%20%20key%20%7B%0A%20%20%20%20%20%20recordedAt%0A%20%20%20%20%20%20internalRecordId%0A%20%20%20%20%7D%0A%20%20%20%20recordedBytes%0A%20%20%7D%0A%7D%0A)
+
+            {
+              findDataRecords(agreementId: "0b12c601-9287-3f5c-a78c-df508fe0f889", year: 2020, month: 1) {
+                key {
+                  recordedAt
+                  internalRecordId
+                }
+                recordedBytes
+              }
+            }
+
+    - Getting total data usage, click [here](http://localhost:8080/graphiql?query=%7B%0A%20%20getTotalDataUsage(agreementId%3A%20%220b12c601-9287-3f5c-a78c-df508fe0f889%22%2C%20year%3A%202020%2C%20month%3A%201)%0A%7D%0A)
+
+            {
+              getTotalDataUsage(agreementId: "0b12c601-9287-3f5c-a78c-df508fe0f889", year: 2020, month: 1)
+            }
+
+    - Upserting data record mutation, click [here](http://localhost:8080/graphiql?query=mutation%20upsertDataRecord(%24agreementId%3A%20String!%2C%20%24upsertRequest%3A%20DataRecordUpsertRequest!)%20%7B%0A%20%20upsertDataRecord(agreementId%3A%20%24agreementId%2C%20upsertRequest%3A%20%24upsertRequest)%20%7B%0A%20%20%20%20key%20%7B%0A%20%20%20%20%20%20agreementId%0A%20%20%20%20%20%20year%0A%20%20%20%20%20%20month%0A%20%20%20%20%20%20recordedAt%0A%20%20%20%20%20%20internalRecordId%0A%20%20%20%20%7D%0A%20%20%20%20recordedBytes%0A%20%20%7D%0A%7D%0A&operationName=upsertDataRecord&variables=%7B%0A%20%20%22agreementId%22%3A%20%220b12c601-9287-3f5c-a78c-df508fe0f889%22%2C%0A%20%20%22upsertRequest%22%3A%20%7B%0A%20%20%20%20%22recordedAt%22%3A%20%222020-01-01T23%3A00%3A00.000%2B00%3A00%22%2C%0A%20%20%20%20%22internalRecordId%22%3A%20%2282b6a30a-b659-3a4d-85f7-2771b6f69f56%22%2C%0A%20%20%20%20%22recordedBytes%22%3A%20123456%0A%20%20%7D%0A%7D)
+
+            mutation upsertDataRecord($agreementId: String!, $upsertRequest: DataRecordUpsertRequest!) {
+              upsertDataRecord(agreementId: $agreementId, upsertRequest: $upsertRequest) {
+                key {
+                  agreementId
+                  year
+                  month
+                  recordedAt
+                  internalRecordId
+                }
+                recordedBytes
+              }
+            }
+
+        Query variables:
+    
+            {
+              "agreementId": "0b12c601-9287-3f5c-a78c-df508fe0f889",
+              "upsertRequest": {
+                "recordedAt": "2020-01-01T23:00:00.000+00:00",
+                "internalRecordId": "82b6a30a-b659-3a4d-85f7-2771b6f69f56",
+                "recordedBytes": 123456
+              }
+            }
+
