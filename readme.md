@@ -255,7 +255,7 @@ One of the results of running the complete case study as described above, is tha
 
         curl http://localhost:8080/api/data-records/0b12c601-9287-3f5c-a78c-df508fe0f889/2020/01 | jq .
         curl http://localhost:8080/api/data-records/0b12c601-9287-3f5c-a78c-df508fe0f889/2020/02 | jq .
-        curl --header "Content-Type: application/json" --request PUT --data '{"recordedAt": "2020-01-01T23:00:00.000+00:00", "internalRecordId": "82b6a30a-b659-3a4d-85f7-2771b6f69f56", "recordedBytes": 123456}' http://localhost:8080/api/data-records/0b12c601-9287-3f5c-a78c-df508fe0f889
+        curl --header "Content-Type: application/json" --request PUT --data '{"recordedAt": "2020-01-01T23:00:00.000+00:00", "internalRecordId": "82b6a30a-b659-3a4d-85f7-2771b6f69f56", "recordedBytes": 123456}' http://localhost:8080/api/data-records/0b12c601-9287-3f5c-a78c-df508fe0f889 | jq .
 
 7. Getting data records in React app (work in progress)
 

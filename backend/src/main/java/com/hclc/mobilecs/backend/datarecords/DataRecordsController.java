@@ -31,10 +31,11 @@ class DataRecordsController {
 
     @PutMapping("/{agreementId}")
     @CrossOrigin(origins = "http://localhost:3000")
-    void upsert(@PathVariable String agreementId, @RequestBody DataRecordUpsertRequest upsertRequest) {
+    DataRecord upsert(@PathVariable String agreementId, @RequestBody DataRecordUpsertRequest upsertRequest) {
         Agreement agreement = new Agreement(UUID.fromString(agreementId), null, null, null, BILLING_PERIOD_TIME_ZONE, 0); // only for case study; get from agreements repository otherwise
         DataRecord dataRecord = DataRecord.from(agreement, upsertRequest);
         dataRecordRepository.save(dataRecord);
+        return dataRecord;
     }
 
     @GetMapping("/{agreementId}/{year}/{month}/total-data-used")
